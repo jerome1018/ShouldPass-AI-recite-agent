@@ -47,6 +47,16 @@
   .config-btn:hover { background: #2a3322; }
   .config-btn.configured { border-color: var(--green); color: var(--green); background: #0f2e1a; }
 
+  /* Star button */
+  .star-btn {
+    background: linear-gradient(135deg, #2e240a 0%, #2a1f00 100%);
+    border: 1px solid #d2a563; color: #d2a563;
+    padding: 6px 12px; border-radius: 20px; cursor: pointer;
+    font-size: 12px; font-weight: 600; transition: .15s; white-space: nowrap;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+  }
+  .star-btn:hover { background: #3e3010; border-color: #e2b573; color: #e2b573; }
+
   main { flex: 1; max-width: 900px; width: 100%; margin: 24px auto; padding: 0 24px; }
 
   /* ── API Setup Banner (onboarding) ────────── */
@@ -193,6 +203,7 @@
     </nav>
     <button class="config-btn" id="config-btn" onclick="openSettings()">⚡ 配置API</button>
     <button class="secondary" onclick="openGuide()" style="font-size:13px;padding:7px 14px;">📖 使用指南</button>
+    <a class="star-btn" href="https://github.com/jerome1018/ShouldPass-AI-recite-agent" target="_blank" title="觉得好用？给个 Star 吧！">⭐ Star</a>
   </div>
 </header>
 

@@ -6,6 +6,15 @@
 
 ---
 
+## 🚀 Try It Online — No Install Needed
+
+> **[👉 Click here to open the Web version 👈](https://jerome1018.github.io/ShouldPass-AI-recite-agent/)**
+>
+> No download. No setup. Just bring your own API key and start quizzing in your browser.
+> Supports `.md` `.txt` `.pdf` `.docx` — drag, drop, and get grilled by an LLM.
+
+---
+
 ## Why recite?
 
 You've read the paper. You've highlighted the slides. You *feel* like you understand it. But can you explain RoPE's long-range decay from scratch, under pressure, with no notes?
@@ -106,6 +115,15 @@ When you answer, the LLM cross-checks your response against every keyword — if
 > *"你以为你懂了。LLM 不这么认为。"*
 
 **recite** 把你的学习笔记变成一台无情的提问机器。丢一份文档进去，它自动整理成结构化题库。然后它考你——还批你。答对的给个点头，漏掉的关键词一个不落地点出来。不手软，不客套，不说"挺不错的"。就是冷冰冰的精准反馈，直到你真正记住你以为已经会了的东西。
+
+---
+
+## 🚀 在线体验 — 无需安装
+
+> **[👉 点这里打开网页版 👈](https://jerome1018.github.io/ShouldPass-AI-recite-agent/)**
+>
+> 不用下载，不用配置环境。带上你自己的 API Key，浏览器里直接开背。
+> 支持 `.md` `.txt` `.pdf` `.docx` — 拖拽上传，LLM 当场拷打。
 
 ---
 
