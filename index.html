@@ -19,40 +19,71 @@
     background: var(--bg); color: var(--text); min-height: 100vh;
     display: flex; flex-direction: column;
   }
+
+  /* ── Header ───────────────────────────────── */
   header {
     background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 14px 24px; display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 10px;
+    padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
   }
+  header .brand { display: flex; align-items: center; gap: 10px; }
   header h1 { font-size: 19px; font-weight: 600; }
   header .badge { font-size: 11px; color: var(--dim); }
   header .right { display: flex; align-items: center; gap: 10px; }
-  header .gear-btn {
-    background: none; border: 1px solid var(--border); color: var(--dim);
-    font-size: 15px; cursor: pointer; border-radius: var(--radius); padding: 6px 11px; transition: .15s;
-  }
-  header .gear-btn:hover { color: var(--text); border-color: var(--text); }
-  header .gear-btn.configured { color: var(--green); border-color: var(--green); }
-  nav { display: flex; gap: 6px; }
+  nav { display: flex; gap: 5px; }
   nav button {
     background: var(--surface); border: 1px solid var(--border); color: var(--text);
     padding: 7px 14px; border-radius: var(--radius); cursor: pointer; font-size: 13px; transition: .15s;
   }
   nav button:hover { background: #1c2333; }
   nav button.active { border-color: var(--blue); color: var(--blue); }
+
+  /* Config button in header */
+  .config-btn {
+    background: #1a2332; border: 1px solid var(--yellow); color: var(--yellow);
+    padding: 7px 14px; border-radius: var(--radius); cursor: pointer; font-size: 13px;
+    font-weight: 600; transition: .15s; white-space: nowrap;
+  }
+  .config-btn:hover { background: #2a3322; }
+  .config-btn.configured { border-color: var(--green); color: var(--green); background: #0f2e1a; }
+
   main { flex: 1; max-width: 900px; width: 100%; margin: 24px auto; padding: 0 24px; }
 
-  /* Dropzone */
+  /* ── API Setup Banner (onboarding) ────────── */
+  .setup-banner {
+    background: linear-gradient(135deg, #1a2332 0%, #1a1a2e 100%);
+    border: 1px solid var(--yellow); border-radius: 12px; padding: 24px 28px;
+    margin-bottom: 24px;
+  }
+  .setup-banner h2 { font-size: 18px; margin-bottom: 6px; }
+  .setup-banner p { color: var(--dim); font-size: 13px; margin-bottom: 14px; line-height: 1.6; }
+  .setup-banner .fields { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+  .setup-banner .fields .full { grid-column: 1 / -1; }
+  .setup-banner label { display: block; font-size: 12px; color: var(--dim); margin-bottom: 3px; }
+  .setup-banner input, .setup-banner select {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    color: var(--text); padding: 9px 11px; border-radius: var(--radius);
+    font-size: 13px; font-family: monospace;
+  }
+  .setup-banner input:focus { outline: none; border-color: var(--blue); }
+  .setup-banner .preset-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .setup-banner .preset {
+    background: var(--bg); border: 1px solid var(--border); color: var(--dim);
+    padding: 4px 10px; border-radius: 14px; font-size: 11px; cursor: pointer; transition: .15s;
+  }
+  .setup-banner .preset:hover { border-color: var(--blue); color: var(--blue); }
+
+  /* ── Dropzone ─────────────────────────────── */
   .dropzone {
-    border: 2px dashed var(--border); border-radius: var(--radius); padding: 50px 24px;
-    text-align: center; cursor: pointer; transition: .2s; margin-bottom: 20px;
+    border: 2px dashed var(--border); border-radius: var(--radius); padding: 44px 24px;
+    text-align: center; cursor: pointer; transition: .2s; margin-bottom: 16px;
   }
   .dropzone:hover, .dropzone.dragover { border-color: var(--blue); background: #0d1b2b; }
-  .dropzone .icon { font-size: 44px; margin-bottom: 10px; }
+  .dropzone .icon { font-size: 40px; margin-bottom: 8px; }
   .dropzone .hint { color: var(--dim); font-size: 12px; margin-top: 6px; }
   .file-input { display: none; }
 
-  /* Deck list */
+  /* ── Deck list ────────────────────────────── */
   .deck-list { display: grid; gap: 10px; }
   .deck-card {
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
@@ -62,15 +93,14 @@
   .deck-card:hover { border-color: var(--blue); }
   .deck-card .name { font-weight: 600; font-size: 14px; }
   .deck-card .meta { color: var(--dim); font-size: 11px; margin-top: 3px; }
-  .deck-card .count { color: var(--blue); font-size: 13px; }
-  .deck-card .actions { display: flex; gap: 6px; }
+  .deck-card .count { color: var(--blue); font-size: 13px; white-space: nowrap; }
   .deck-card .del-btn {
     background: none; border: 1px solid var(--border); color: var(--dim);
-    font-size: 12px; cursor: pointer; border-radius: 4px; padding: 3px 8px;
+    font-size: 12px; cursor: pointer; border-radius: 4px; padding: 3px 8px; margin-left: 8px;
   }
   .deck-card .del-btn:hover { color: var(--red); border-color: var(--red); }
 
-  /* Quiz */
+  /* ── Quiz ─────────────────────────────────── */
   .quiz-header {
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
     padding: 18px 22px; margin-bottom: 16px;
@@ -88,6 +118,8 @@
     font-size: 14px; line-height: 1.7; resize: vertical; min-height: 140px; font-family: inherit;
   }
   textarea:focus { outline: none; border-color: var(--blue); }
+
+  /* ── Buttons ──────────────────────────────── */
   .btn-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
   button.primary {
     background: #238636; border: none; color: #fff; padding: 9px 22px;
@@ -101,7 +133,7 @@
   button.secondary:hover { background: #1c2333; }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* Evaluation card */
+  /* ── Evaluation ───────────────────────────── */
   .eval-card {
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
     padding: 22px; margin-top: 18px; line-height: 1.8; font-size: 14px;
@@ -114,70 +146,44 @@
   .score-mid { background: #2e240a; color: var(--orange); border: 1px solid #5c401a; }
   .score-low { background: #2e0f0f; color: var(--red); border: 1px solid #5c1a1a; }
 
-  /* Summary */
-  .summary .row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 9px 0; border-bottom: 1px solid var(--border);
-  }
+  /* ── Summary ──────────────────────────────── */
+  .summary .row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
   .summary .stars { color: var(--yellow); font-size: 15px; letter-spacing: 2px; }
 
-  /* Progress bar */
+  /* ── Progress ─────────────────────────────── */
   .progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 10px; }
   .progress-bar .fill { height: 100%; background: var(--green); border-radius: 2px; transition: .3s; }
 
-  /* States */
+  /* ── States ───────────────────────────────── */
   .loading { text-align: center; padding: 36px; color: var(--dim); }
-  .spinner {
-    display: inline-block; width: 30px; height: 30px;
-    border: 3px solid var(--border); border-top-color: var(--blue);
-    border-radius: 50%; animation: spin .8s linear infinite; margin-bottom: 10px;
-  }
+  .spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .8s linear infinite; margin-bottom: 10px; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .empty { text-align: center; padding: 60px 24px; color: var(--dim); }
   .empty .icon { font-size: 40px; margin-bottom: 10px; }
 
-  /* Toast */
-  .toast {
-    position: fixed; top: 16px; right: 16px;
-    background: var(--surface); border: 1px solid var(--border);
-    padding: 10px 18px; border-radius: var(--radius); font-size: 13px; z-index: 999;
-    animation: fadeIn .2s; max-width: 350px;
-  }
+  /* ── Toast ────────────────────────────────── */
+  .toast { position: fixed; top: 16px; right: 16px; background: var(--surface); border: 1px solid var(--border); padding: 10px 18px; border-radius: var(--radius); font-size: 13px; z-index: 999; animation: toastIn .2s; max-width: 350px; }
   .toast.error { border-color: var(--red); color: var(--red); }
   .toast.success { border-color: var(--green); color: var(--green); }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } }
-
-  /* Modal */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,.6);
-    display: flex; align-items: center; justify-content: center; z-index: 1000;
-  }
-  .modal {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 26px; width: 450px; max-width: 90vw;
-  }
-  .modal h2 { font-size: 17px; margin-bottom: 16px; }
-  .modal label { display: block; font-size: 12px; color: var(--dim); margin: 10px 0 3px; }
-  .modal input {
-    width: 100%; background: var(--bg); border: 1px solid var(--border);
-    color: var(--text); padding: 9px 11px; border-radius: var(--radius); font-size: 13px; font-family: monospace;
-  }
-  .modal input:focus { outline: none; border-color: var(--blue); }
-  .modal .hint { font-size: 11px; color: var(--dim); margin-top: 3px; }
-  .modal .btn-row { justify-content: flex-end; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(-6px); } }
 
   .hidden { display: none !important; }
 
-  /* Chunk progress */
-  .chunk-progress { margin-top: 10px; font-size: 12px; color: var(--dim); }
+  /* ── Debug output ─────────────────────────── */
+  .debug-box {
+    background: #0a0a0a; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px 16px; margin-top: 10px; font-size: 11px; font-family: monospace;
+    max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;
+    color: var(--dim); line-height: 1.5;
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <div>
+  <div class="brand">
     <h1>🧠 recite</h1>
-    <span class="badge">AI-powered knowledge quiz · 纯浏览器运行</span>
+    <span class="badge">AI 背诵教官 · 纯浏览器运行</span>
   </div>
   <div class="right">
     <nav>
@@ -185,30 +191,35 @@
       <button id="nav-decks" onclick="showTab('decks')">📚 题库列表</button>
       <button id="nav-quiz" onclick="showTab('quiz')">✏️ 答题</button>
     </nav>
-    <button class="gear-btn" id="gear-btn" onclick="openSettings()" title="LLM 配置">⚙️</button>
+    <button class="config-btn" id="config-btn" onclick="openSettings()">⚡ 配置API</button>
   </div>
 </header>
 
 <!-- Settings modal -->
 <div class="modal-overlay hidden" id="settings-modal">
   <div class="modal">
-    <h2>⚙️ LLM API 配置</h2>
-    <p style="color:var(--dim);font-size:12px;margin-bottom:6px;">
-      输入你自己的 API Key，所有请求直接从浏览器发送，不会经过任何服务器。
+    <h2>⚡ 配置 LLM API</h2>
+    <p style="color:var(--dim);font-size:12px;margin-bottom:12px;line-height:1.6;">
+      你的 API Key 只存在浏览器本地（localStorage），<strong>不会上传到任何服务器</strong>。<br>
+      所有 LLM 请求直接从你的浏览器发出。
     </p>
-    <label>API Key（必填）</label>
+    <label>API Key</label>
     <input type="password" id="cfg-api-key" placeholder="sk-xxxxxxxx" autocomplete="off">
     <label>Base URL</label>
     <input type="text" id="cfg-base-url" placeholder="https://api.deepseek.com">
-    <div class="hint">DeepSeek: https://api.deepseek.com | OpenAI: https://api.openai.com/v1</div>
+    <div class="hint" style="font-size:11px;color:var(--dim);margin-top:3px;">
+      常用：<code style="color:var(--blue);cursor:pointer" onclick="document.getElementById('cfg-base-url').value='https://api.deepseek.com'">DeepSeek</code> ·
+      <code style="color:var(--blue);cursor:pointer" onclick="document.getElementById('cfg-base-url').value='https://api.openai.com/v1'">OpenAI</code> ·
+      或其他 OpenAI 兼容接口
+    </div>
     <label>Model</label>
     <input type="text" id="cfg-model" placeholder="deepseek-chat">
-    <div class="hint">如 deepseek-chat, gpt-4o, qwen-plus, claude-sonnet-4-6 等</div>
+    <div class="hint" style="font-size:11px;color:var(--dim);margin-top:3px;">如 deepseek-chat / gpt-4o / qwen-plus 等</div>
     <label>Max Tokens</label>
     <input type="number" id="cfg-max-tokens" placeholder="16384" value="16384">
-    <div class="btn-row" style="margin-top:18px;">
+    <div class="btn-row" style="margin-top:18px;justify-content:flex-end;">
       <button class="secondary" onclick="closeSettings()">取消</button>
-      <button class="primary" onclick="saveSettings()">保存</button>
+      <button class="primary" onclick="saveSettings()">保存配置</button>
     </div>
   </div>
 </div>
@@ -216,12 +227,47 @@
 <main>
   <!-- UPLOAD TAB -->
   <section id="tab-upload">
-    <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
-      <div class="icon">📤</div>
-      <div>拖拽文档到此处，或点击上传</div>
-      <div class="hint">支持 .md / .txt / .pdf / .docx — 直接调用 LLM API 梳理题库（需要先配置 ⚙️）</div>
+    <!-- Onboarding: shown when no API key configured -->
+    <div class="setup-banner hidden" id="setup-banner">
+      <h2>👋 欢迎！请先配置 LLM API</h2>
+      <p>recite 需要调用大模型来梳理题目和评价答案。请输入你的 API Key——不会上传，只存在你浏览器里。</p>
+      <div class="fields">
+        <div>
+          <label>API Key</label>
+          <input type="password" id="banner-api-key" placeholder="sk-xxxxxxxx" autocomplete="off">
+        </div>
+        <div>
+          <label>Base URL</label>
+          <input type="text" id="banner-base-url" placeholder="https://api.deepseek.com">
+        </div>
+        <div>
+          <label>Model</label>
+          <input type="text" id="banner-model" placeholder="deepseek-chat">
+        </div>
+        <div>
+          <label>Max Tokens</label>
+          <input type="number" id="banner-max-tokens" placeholder="16384" value="16384">
+        </div>
+      </div>
+      <div class="preset-row">
+        <span style="font-size:11px;color:var(--dim);">快速填入：</span>
+        <button class="preset" onclick="fillPreset('deepseek')">🔵 DeepSeek</button>
+        <button class="preset" onclick="fillPreset('openai')">🟢 OpenAI</button>
+      </div>
+      <div class="btn-row">
+        <button class="primary" onclick="saveBannerSettings()">保存并开始使用 →</button>
+      </div>
     </div>
-    <input type="file" id="fileInput" class="file-input" accept=".md,.txt,.pdf,.docx" onchange="handleUpload(this.files[0])">
+
+    <!-- Ready state: shown when API is configured -->
+    <div id="upload-ready">
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+        <div class="icon">📤</div>
+        <div>拖拽文档到此处，或点击上传</div>
+        <div class="hint">支持 .md / .txt / .pdf / .docx — LLM 自动梳理成结构化题库</div>
+      </div>
+      <input type="file" id="fileInput" class="file-input" accept=".md,.txt,.pdf,.docx" onchange="handleUpload(this.files[0])">
+    </div>
     <div id="upload-status" class="hidden"></div>
   </section>
 
@@ -244,11 +290,11 @@
         <div class="progress-bar"><div class="fill" id="quiz-progress-bar" style="width:0%"></div></div>
         <div class="keywords" id="quiz-keywords"></div>
       </div>
-      <textarea id="quiz-answer" placeholder="输入你的答案...（支持多行，Cmd/Ctrl+Enter 提交）"></textarea>
+      <textarea id="quiz-answer" placeholder="输入你的答案...（多行文本，Cmd/Ctrl + Enter 提交）"></textarea>
       <div class="btn-row">
-        <button class="primary" id="btn-submit" onclick="submitAnswer()">提交答案</button>
-        <button class="secondary" id="btn-skip" onclick="nextQuestion()">跳过</button>
-        <button class="secondary" id="btn-finish" onclick="finishQuiz()">结束答题</button>
+        <button class="primary" id="btn-submit" onclick="submitAnswer()">✅ 提交答案</button>
+        <button class="secondary" id="btn-skip" onclick="nextQuestion()">⏭ 跳过</button>
+        <button class="secondary" id="btn-finish" onclick="finishQuiz()">📊 结束答题</button>
       </div>
       <div id="eval-container"></div>
     </div>
@@ -257,31 +303,29 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════
-// LLM Client (browser-side)
+// LLM Client
 // ═══════════════════════════════════════════════════════════
 function getLLMSettings() {
   try { return JSON.parse(localStorage.getItem('recite_llm') || '{}'); } catch { return {}; }
 }
-
 function saveLLMSettingsObj(cfg) { localStorage.setItem('recite_llm', JSON.stringify(cfg)); }
 
-async function callLLM(messages, temperature = 0.3, maxTokens = null) {
+async function callLLM(messages, temperature=0.3, maxTokens=null) {
   const cfg = getLLMSettings();
-  if (!cfg.api_key) throw new Error('请先点击 ⚙️ 配置 API Key');
+  if (!cfg.api_key) throw new Error('请先配置 API Key');
   const baseUrl = (cfg.base_url || 'https://api.deepseek.com').replace(/\/+$/, '');
   const res = await fetch(baseUrl + '/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.api_key },
     body: JSON.stringify({
       model: cfg.model || 'deepseek-chat',
-      messages,
-      temperature,
+      messages, temperature,
       max_tokens: maxTokens || parseInt(cfg.max_tokens) || 16384,
     }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `HTTP ${res.status}`);
+    throw new Error(err.error?.message || `HTTP ${res.status}: ${res.statusText}`);
   }
   const data = await res.json();
   return data.choices[0].message.content;
@@ -291,16 +335,16 @@ async function callLLM(messages, temperature = 0.3, maxTokens = null) {
 // Document Reader
 // ═══════════════════════════════════════════════════════════
 async function readDocument(file) {
-  const ext = '.' + file.name.split('.').pop().toLowerCase();
-  if (['.md', '.txt', '.markdown', '.rst', '.org'].includes(ext)) {
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (['md','txt','markdown','rst','org'].includes(ext)) {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsText(file);
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(new Error('Failed to read file'));
+      r.readAsText(file);
     });
   }
-  if (ext === '.pdf') {
+  if (ext === 'pdf') {
     const buf = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
     const pages = [];
@@ -311,16 +355,16 @@ async function readDocument(file) {
     }
     return pages.join('\n\n');
   }
-  if (ext === '.docx') {
+  if (ext === 'docx') {
     const buf = await file.arrayBuffer();
     const result = await mammoth.extractRawText({ arrayBuffer: buf });
     return result.value;
   }
-  throw new Error('Unsupported format: ' + ext);
+  throw new Error('不支持的格式: .' + ext + '（支持 .md / .txt / .pdf / .docx）');
 }
 
 // ═══════════════════════════════════════════════════════════
-// Card Generator (JS port from card_generator.py)
+// Card Generator
 // ═══════════════════════════════════════════════════════════
 const CARD_SYSTEM_PROMPT = `你是一个知识题库整理助手。用户会提供一份包含题目和参考答案的文档片段，请你：
 
@@ -347,34 +391,65 @@ const CARD_SYSTEM_PROMPT = `你是一个知识题库整理助手。用户会提�
 
 const CHUNK_SIZE = 30000;
 
-function parseLLMResponse(response) {
-  if (!response) return [];
-  try { return JSON.parse(response); } catch {}
-  const m = response.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-  if (m) { try { return JSON.parse(m[1]); } catch {} }
-  const m2 = response.match(/\[\s*\{[\s\S]*\}\s*\]/);
-  if (m2) { try { return JSON.parse(m2[0]); } catch {} }
-  return [];
+function parseLLMResponse(response, label) {
+  if (!response || !response.trim()) {
+    console.warn(label + ': empty response');
+    return { cards: null, errors: ['LLM 返回了空内容'] };
+  }
+  const errors = [];
+
+  // Strategy 1: direct JSON parse
+  try {
+    const cards = JSON.parse(response.trim());
+    if (Array.isArray(cards)) return { cards, errors };
+  } catch (e) { errors.push('直接JSON解析失败: ' + e.message); }
+
+  // Strategy 2: extract from ```json ... ``` block
+  let m = response.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (m) {
+    try { const cards = JSON.parse(m[1].trim()); if (Array.isArray(cards)) return { cards, errors }; }
+    catch (e) { errors.push('代码块提取失败: ' + e.message); }
+  }
+
+  // Strategy 3: find outermost JSON array (greedy)
+  m = response.match(/\[\s*\{[\s\S]*\}\s*\]/);
+  if (m) {
+    try { const cards = JSON.parse(m[0]); if (Array.isArray(cards)) return { cards, errors }; }
+    catch (e) { errors.push('数组正则提取失败: ' + e.message); }
+  }
+
+  // Strategy 4: try to fix truncated JSON
+  m = response.match(/\[\s*\{[\s\S]*\}\s*\]/);
+  if (!m) {
+    // Maybe JSON is truncated — try to find the last complete object
+    const lastComplete = response.lastIndexOf('}]');
+    if (lastComplete > 0) {
+      const truncated = response.substring(0, lastComplete + 2);
+      try { const cards = JSON.parse(truncated); if (Array.isArray(cards)) return { cards, errors }; }
+      catch (e) { errors.push('截断修复失败: ' + e.message); }
+    }
+  }
+
+  console.error(label + ': all parse strategies failed', errors);
+  return { cards: null, errors };
 }
 
 function splitByHeaders(text) {
   const sections = text.split(/\n(?=#{1,3}\s)/);
   if (sections.length <= 1) {
     const paragraphs = text.split('\n\n');
-    const chunks = [];
-    let cur = '';
+    const chunks = []; let cur = '';
     for (const p of paragraphs) {
       if (cur.length + p.length > CHUNK_SIZE && cur) { chunks.push(cur); cur = p; }
-      else cur = (cur + '\n\n' + p).trim();
+      else cur = (cur ? cur + '\n\n' + p : p);
     }
     if (cur) chunks.push(cur);
     return chunks.length > 1 ? chunks : [text];
   }
-  const chunks = [];
-  let cur = '';
+  const chunks = []; let cur = '';
   for (const s of sections) {
     if (cur.length + s.length > CHUNK_SIZE && cur) { chunks.push(cur); cur = s; }
-    else cur = (cur + '\n' + s).trim();
+    else cur = (cur ? cur + '\n' + s : s);
   }
   if (cur) chunks.push(cur);
   return chunks.length ? chunks : [text];
@@ -386,63 +461,43 @@ async function generateCardsFromText(docText, onProgress) {
     const chunks = splitByHeaders(docText);
     if (onProgress) onProgress({ type: 'chunks', total: chunks.length });
     for (let i = 0; i < chunks.length; i++) {
-      if (onProgress) onProgress({ type: 'chunk', idx: i, total: chunks.length, preview: chunks[i].trim().slice(0, 40) });
+      if (onProgress) onProgress({ type: 'chunk', idx: i, total: chunks.length, preview: chunks[i].trim().slice(0, 50) });
       const resp = await callLLM([
         { role: 'system', content: CARD_SYSTEM_PROMPT },
         { role: 'user', content: chunks[i] },
       ], 0.3, 16384);
-      const cards = parseLLMResponse(resp);
-      allCards = allCards.concat(cards);
-      if (onProgress) onProgress({ type: 'chunk_done', idx: i, count: cards.length });
+      const result = parseLLMResponse(resp, 'Chunk ' + (i+1) + '/' + chunks.length);
+      if (result.cards && result.cards.length) allCards = allCards.concat(result.cards);
+      if (onProgress) onProgress({ type: 'chunk_done', idx: i, count: result.cards ? result.cards.length : 0, resp: resp, errors: result.errors });
     }
   } else {
     const resp = await callLLM([
       { role: 'system', content: CARD_SYSTEM_PROMPT },
       { role: 'user', content: docText },
     ], 0.3, 16384);
-    allCards = parseLLMResponse(resp);
+    const result = parseLLMResponse(resp, 'Generate');
+    if (result.cards) allCards = result.cards;
+    if (onProgress) onProgress({ type: 'done', count: allCards.length, resp: resp, errors: result.errors });
   }
-  // Assign IDs
-  allCards.forEach((c, i) => { if (!c.id) c.id = i; });
+  allCards.forEach((c, i) => { c.id = c.id ?? i; });
   return allCards;
 }
 
 // ═══════════════════════════════════════════════════════════
 // Deck Storage (localStorage)
 // ═══════════════════════════════════════════════════════════
-function loadDecks() {
-  try { return JSON.parse(localStorage.getItem('recite_decks') || '{}'); } catch { return {}; }
-}
-
+function loadDecks() { try { return JSON.parse(localStorage.getItem('recite_decks') || '{}'); } catch { return {}; } }
 function saveDecks(decks) { localStorage.setItem('recite_decks', JSON.stringify(decks)); }
-
 function saveDeck(name, cards) {
   const decks = loadDecks();
-  decks[name] = {
-    name, cards,
-    created_at: new Date().toISOString(),
-    history: decks[name]?.history || [],
-  };
+  decks[name] = { name, cards, created_at: new Date().toISOString(), history: decks[name]?.history || [] };
   saveDecks(decks);
 }
-
-function deleteDeck(name) {
-  const decks = loadDecks();
-  delete decks[name];
-  saveDecks(decks);
-}
-
-function loadHistory(deckName) {
-  const decks = loadDecks();
-  return decks[deckName]?.history || [];
-}
+function deleteDeck(name) { const decks = loadDecks(); delete decks[name]; saveDecks(decks); }
 
 function saveHistory(deckName, records) {
   const decks = loadDecks();
-  if (decks[deckName]) {
-    decks[deckName].history = (decks[deckName].history || []).concat(records);
-    saveDecks(decks);
-  }
+  if (decks[deckName]) { decks[deckName].history = (decks[deckName].history || []).concat(records); saveDecks(decks); }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -481,8 +536,7 @@ function startQuiz(deckName) {
   quizState = {
     deckName,
     cards: deck.cards.map((c, i) => { c.id = c.id ?? i; return c; }),
-    attempted: {},
-    history: [],
+    attempted: {}, history: [],
   };
   document.getElementById('quiz-empty').classList.add('hidden');
   document.getElementById('quiz-active').classList.remove('hidden');
@@ -501,26 +555,29 @@ async function nextQuestion() {
   if (Object.keys(attempted).length >= cards.length) { finishQuiz(); return; }
 
   const unattempted = cards.filter(c => !(c.id in attempted));
-  const pick = unattempted.length ? unattempted[Math.floor(Math.random() * unattempted.length)]
-    : cards.filter(c => (attempted[c.id]?.score || 0) < 3).sort((a, b) => (attempted[a.id]?.score || 0) - (attempted[b.id]?.score || 0))[0] || cards[0];
+  const pick = unattempted.length
+    ? unattempted[Math.floor(Math.random() * unattempted.length)]
+    : (cards.filter(c => (attempted[c.id]?.score || 0) < 3)
+        .sort((a, b) => (attempted[a.id]?.score || 0) - (attempted[b.id]?.score || 0))[0] || cards[0]);
 
   quizState.currentCard = pick;
   document.getElementById('quiz-question').textContent = pick.question;
   document.getElementById('quiz-progress-text').textContent = `已答 ${Object.keys(attempted).length} / ${cards.length} 题`;
   document.getElementById('quiz-progress-bar').style.width = (Object.keys(attempted).length / cards.length * 100) + '%';
-  document.getElementById('quiz-keywords').innerHTML = (pick.keywords || []).map(k => `<span class="kw">${esc(k)}</span>`).join('');
-  document.getElementById('quiz-keywords').style.display = 'flex';
+  const kw = document.getElementById('quiz-keywords');
+  kw.innerHTML = (pick.keywords || []).map(k => `<span class="kw">${esc(k)}</span>`).join('');
+  kw.style.display = (pick.keywords || []).length ? 'flex' : 'none';
   document.getElementById('quiz-answer').focus();
 }
 
 async function submitAnswer() {
   if (!quizState || !quizState.currentCard) return;
   const answer = document.getElementById('quiz-answer').value.trim();
-  if (!answer) { toast('请输入答案再提交', 'error'); return; }
+  if (!answer) { toast('请输入你的答案再提交', 'error'); return; }
 
   document.getElementById('btn-submit').disabled = true;
   const evalDiv = document.getElementById('eval-container');
-  evalDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>LLM 正在评价...</p></div>';
+  evalDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>LLM 正在评价你的回答...</p></div>';
 
   const card = quizState.currentCard;
   try {
@@ -535,24 +592,22 @@ async function submitAnswer() {
     quizState.attempted[card.id] = { score, answer, ts: new Date().toISOString() };
     quizState.history.push({ question: card.question, score, answer, evaluation: resp });
 
-    const scoreClass = score >= 4 ? 'score-high' : score >= 2 ? 'score-mid' : 'score-low';
-    const stars = '★'.repeat(Math.max(0, score)) + '☆'.repeat(Math.max(0, 5 - score));
+    const sc = score >= 4 ? 'score-high' : score >= 2 ? 'score-mid' : 'score-low';
+    const stars = '★'.repeat(Math.max(0,score)) + '☆'.repeat(Math.max(0,5-score));
 
-    evalDiv.innerHTML = `
-      <div class="eval-card">
-        <div class="score-badge ${scoreClass}">${stars} ${score}/5</div>
-        <div style="margin-top:14px;">${formatMD(resp)}</div>
-      </div>
-      <div class="btn-row" style="margin-top:14px;">
-        <button class="primary" onclick="nextQuestion()">下一题 →</button>
-        <button class="secondary" onclick="finishQuiz()">结束答题</button>
-      </div>`;
+    evalDiv.innerHTML = `<div class="eval-card">
+      <div class="score-badge ${sc}">${stars} ${score}/5</div>
+      <div style="margin-top:14px;">${formatMD(resp)}</div>
+    </div>
+    <div class="btn-row" style="margin-top:14px;">
+      <button class="primary" onclick="nextQuestion()">下一题 →</button>
+      <button class="secondary" onclick="finishQuiz()">结束答题</button>
+    </div>`;
 
     document.getElementById('quiz-progress-text').textContent = `已答 ${Object.keys(quizState.attempted).length} / ${quizState.cards.length} 题`;
     document.getElementById('quiz-progress-bar').style.width = (Object.keys(quizState.attempted).length / quizState.cards.length * 100) + '%';
-
   } catch (e) {
-    evalDiv.innerHTML = `<span style="color:var(--red)">评价失败: ${esc(e.message)}</span>`;
+    evalDiv.innerHTML = `<div class="eval-card"><span style="color:var(--red)">评价失败: ${esc(e.message)}</span></div>`;
     document.getElementById('btn-submit').disabled = false;
   }
 }
@@ -563,22 +618,19 @@ async function finishQuiz() {
 
   const history = quizState.history;
   const scores = history.map(h => h.score).filter(s => s >= 0);
-  const avg = scores.length ? (scores.reduce((a,b) => a+b, 0) / scores.length).toFixed(1) : 0;
-
+  const avg = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : 0;
   saveHistory(quizState.deckName, history);
 
-  const evalDiv = document.getElementById('eval-container');
-  evalDiv.innerHTML = `<div class="eval-card">
+  document.getElementById('eval-container').innerHTML = `<div class="eval-card">
     <h3>📊 答题总结</h3>
     <p style="font-size:18px;margin:10px 0;">平均分: <strong>${avg}/5</strong> | 共答 ${history.length}/${quizState.cards.length} 题</p>
     <div class="summary">
-      ${history.map(h => {
-        const s = h.score || 0;
+      ${history.map(h => { const s = h.score || 0;
         return `<div class="row"><span>${esc(h.question)}</span><span class="stars">${'★'.repeat(Math.max(0,s))}${'☆'.repeat(Math.max(0,5-s))}</span></div>`;
       }).join('')}
     </div>
     <div class="btn-row" style="margin-top:14px;">
-      <button class="secondary" onclick="showTab('decks');renderDecks()">返回题库</button>
+      <button class="secondary" onclick="showTab('decks');renderDecks()">返回题库列表</button>
     </div>
   </div>`;
 
@@ -590,18 +642,20 @@ async function finishQuiz() {
 // ═══════════════════════════════════════════════════════════
 // UI: Upload
 // ═══════════════════════════════════════════════════════════
-const dropzone = document.getElementById('dropzone');
-dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
-dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-dropzone.addEventListener('drop', e => {
-  e.preventDefault(); dropzone.classList.remove('dragover');
-  if (e.dataTransfer.files.length) handleUpload(e.dataTransfer.files[0]);
-});
+(function() {
+  const dz = document.getElementById('dropzone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('dragover');
+    if (e.dataTransfer.files.length) handleUpload(e.dataTransfer.files[0]);
+  });
+})();
 
 async function handleUpload(file) {
   if (!file) return;
   const cfg = getLLMSettings();
-  if (!cfg.api_key) { toast('请先点击右上角 ⚙️ 配置 API Key', 'error'); openSettings(); return; }
+  if (!cfg.api_key) { toast('请先配置 API Key', 'error'); showSetupBanner(true); return; }
 
   const status = document.getElementById('upload-status');
   status.classList.remove('hidden');
@@ -609,33 +663,59 @@ async function handleUpload(file) {
 
   try {
     const docText = await readDocument(file);
-    status.innerHTML = `<div class="loading"><div class="spinner"></div><p>文档已解析（${docText.length.toLocaleString()} 字符），正在调用 LLM 梳理题目...</p><p style="font-size:12px;color:var(--dim)">大文件可能需要 1-3 分钟，请耐心等待</p><div class="chunk-progress" id="chunk-progress"></div></div>`;
+    status.innerHTML = `<div class="loading"><div class="spinner"></div><p>文档已解析（${docText.length.toLocaleString()} 字符）</p><p style="font-size:12px;color:var(--dim);">正在调用 LLM 梳理题目... 大文件可能需要 1-3 分钟</p><div id="chunk-progress" style="margin-top:6px;font-size:12px;color:var(--dim);"></div></div>`;
 
+    const chunkLogs = [];
     const cards = await generateCardsFromText(docText, (ev) => {
       const cp = document.getElementById('chunk-progress');
-      if (cp) {
-        if (ev.type === 'chunks') cp.textContent = `已分 ${ev.total} 个片段，逐段处理中...`;
-        else if (ev.type === 'chunk') cp.textContent = `处理片段 ${ev.idx+1}/${ev.total}: ${ev.preview}...`;
-        else if (ev.type === 'chunk_done') cp.textContent = `片段 ${ev.idx+1}/${ev.total} 完成，提取 ${ev.count} 题`;
+      if (!cp) return;
+      if (ev.type === 'chunks') cp.textContent = `文档已分为 ${ev.total} 个片段，逐段调用 LLM 处理...`;
+      else if (ev.type === 'chunk') cp.textContent = `处理片段 ${ev.idx+1}/${ev.total}：「${ev.preview}」...`;
+      else if (ev.type === 'chunk_done') {
+        cp.textContent = `片段 ${ev.idx+1}/${ev.total} 完成 → 提取 ${ev.count} 题`;
+        if (ev.errors && ev.errors.length) chunkLogs.push({ idx: ev.idx, errors: ev.errors, resp: ev.resp });
+      } else if (ev.type === 'done') {
+        if (ev.errors && ev.errors.length) chunkLogs.push({ idx: -1, errors: ev.errors, resp: ev.resp });
       }
     });
 
-    if (!cards.length) { status.innerHTML = '<div class="eval-card"><span style="color:var(--red)">LLM 未返回有效题目，请重试</span></div>'; return; }
+    if (!cards.length) {
+      let debugHtml = '';
+      if (chunkLogs.length) {
+        debugHtml = '<div class="debug-box">';
+        for (const log of chunkLogs) {
+          debugHtml += `<strong>片段 ${log.idx+1} 解析错误：</strong>\n${esc(log.errors.join('\n'))}\n\n`;
+          debugHtml += `<strong>LLM 原始返回（前 500 字）：</strong>\n${esc((log.resp||'').slice(0,500))}\n\n`;
+        }
+        debugHtml += '</div>';
+      }
+      status.innerHTML = `<div class="eval-card">
+        <p style="color:var(--red);font-weight:600;">⚠️ LLM 未返回有效题目</p>
+        <p style="color:var(--dim);font-size:12px;margin-top:8px;">可能原因：文档格式问题、API 返回异常、或 JSON 解析失败</p>
+        <p style="color:var(--dim);font-size:12px;">请打开浏览器控制台（F12）查看详细日志，或尝试换一个文档</p>
+        ${debugHtml}
+      </div>`;
+      return;
+    }
 
     const baseName = file.name.replace(/\.[^.]+$/, '');
     saveDeck(baseName, cards);
 
     status.innerHTML = `<div class="eval-card">
-      <span style="color:var(--green);font-weight:600;">✅ 题库生成成功！</span>
-      <p style="margin-top:10px;"><strong>${esc(baseName)}</strong> — ${cards.length} 道题目</p>
-      <div style="margin-top:6px;max-height:280px;overflow-y:auto;">
+      <p style="color:var(--green);font-weight:600;">✅ 题库生成成功！</p>
+      <p style="margin-top:8px;"><strong>${esc(baseName)}</strong> — ${cards.length} 道题目</p>
+      <div style="margin-top:8px;max-height:280px;overflow-y:auto;">
         ${cards.map((c,i) => `<div style="padding:3px 0;border-bottom:1px solid var(--border);font-size:12px;">${i+1}. ${esc(c.question)}</div>`).join('')}
       </div>
-      <button class="primary" style="margin-top:10px;" onclick="startQuiz('${esc(baseName)}')">开始答题 →</button>
+      <button class="primary" style="margin-top:12px;" onclick="startQuiz('${esc(baseName).replace(/'/g, "\\'")}')">开始答题 →</button>
     </div>`;
-    toast('题库生成成功！', 'success');
+    toast('题库生成成功！' + cards.length + ' 道题目', 'success');
   } catch (e) {
-    status.innerHTML = `<div class="eval-card"><span style="color:var(--red)">错误：${esc(e.message)}</span></div>`;
+    status.innerHTML = `<div class="eval-card">
+      <p style="color:var(--red);font-weight:600;">错误</p>
+      <p style="margin-top:6px;">${esc(e.message)}</p>
+      <p style="color:var(--dim);font-size:12px;margin-top:4px;">请检查 API 配置是否正确（Base URL、API Key、Model）</p>
+    </div>`;
   }
 }
 
@@ -647,21 +727,18 @@ function renderDecks() {
   const container = document.getElementById('deck-list-container');
   const names = Object.keys(decks);
   if (!names.length) {
-    container.innerHTML = '<div class="empty"><div class="icon">📭</div><p>暂无题库，去上传文档生成吧</p></div>';
+    container.innerHTML = '<div class="empty"><div class="icon">📭</div><p>暂无题库</p><p style="font-size:13px;margin-top:4px;">去「📄 生成题库」上传文档开始吧</p></div>';
     return;
   }
   container.innerHTML = `<div class="deck-list">${names.map(name => {
-    const d = decks[name];
-    const historyCount = (d.history || []).length;
+    const d = decks[name]; const hc = (d.history || []).length;
     return `<div class="deck-card">
-      <div style="flex:1" onclick="startQuiz('${esc(name)}')">
+      <div style="flex:1;cursor:pointer" onclick="startQuiz('${esc(name)}')">
         <div class="name">📚 ${esc(name)}</div>
-        <div class="meta">${d.cards.length} 题 · ${historyCount} 次作答记录 · 创建于 ${(d.created_at||'').slice(0,10)}</div>
+        <div class="meta">${d.cards.length} 题 · ${hc} 次作答 · ${(d.created_at||'').slice(0,10)}</div>
       </div>
-      <div class="actions">
-        <span style="color:var(--blue);font-size:13px;">${d.cards.length} 题</span>
-        <button class="del-btn" onclick="event.stopPropagation();deleteDeck('${esc(name)}');renderDecks();toast('已删除: ${esc(name)}')">🗑</button>
-      </div>
+      <span style="color:var(--blue);font-size:13px;margin-right:6px;">${d.cards.length} 题</span>
+      <button class="del-btn" onclick="event.stopPropagation();if(confirm('删除题库「${esc(name)}」？')){deleteDeck('${esc(name)}');renderDecks();toast('已删除','success')}">🗑</button>
     </div>`;
   }).join('')}</div>`;
 }
@@ -675,20 +752,62 @@ function showTab(name) {
     document.getElementById('nav-' + t).classList.toggle('active', t === name);
   });
   if (name === 'decks') renderDecks();
-  if (name === 'quiz') {
-    const decks = loadDecks();
-    const names = Object.keys(decks);
-    const sel = document.getElementById('quiz-deck-selector');
-    if (!names.length) {
-      sel.innerHTML = '<p style="color:var(--dim)">暂无题库，先去生成吧</p>';
-    } else {
-      sel.innerHTML = `<p style="color:var(--dim);margin-bottom:10px;">选择题库：</p>
-        <div class="deck-list">${names.map(n =>
-          `<div class="deck-card" onclick="startQuiz('${esc(n)}')">
-            <div><div class="name">${esc(n)}</div></div>
-            <div class="count">${decks[n].cards.length} 题</div>
-          </div>`).join('')}</div>`;
-    }
+  if (name === 'quiz') renderQuizSelector();
+  if (name === 'upload') updateUploadView();
+}
+
+function updateUploadView() {
+  const cfg = getLLMSettings();
+  showSetupBanner(!cfg.api_key);
+}
+
+function showSetupBanner(show) {
+  document.getElementById('setup-banner').classList.toggle('hidden', !show);
+  document.getElementById('upload-ready').classList.toggle('hidden', show);
+  if (show) {
+    const cfg = getLLMSettings();
+    document.getElementById('banner-api-key').value = cfg.api_key || '';
+    document.getElementById('banner-base-url').value = cfg.base_url || '';
+    document.getElementById('banner-model').value = cfg.model || '';
+    document.getElementById('banner-max-tokens').value = cfg.max_tokens || '16384';
+  }
+}
+
+function fillPreset(provider) {
+  if (provider === 'deepseek') {
+    document.getElementById('banner-base-url').value = 'https://api.deepseek.com';
+    document.getElementById('banner-model').value = 'deepseek-chat';
+  } else if (provider === 'openai') {
+    document.getElementById('banner-base-url').value = 'https://api.openai.com/v1';
+    document.getElementById('banner-model').value = 'gpt-4o';
+  }
+}
+
+function saveBannerSettings() {
+  saveLLMSettingsObj({
+    api_key: document.getElementById('banner-api-key').value.trim(),
+    base_url: document.getElementById('banner-base-url').value.trim().replace(/\/+$/, ''),
+    model: document.getElementById('banner-model').value.trim(),
+    max_tokens: document.getElementById('banner-max-tokens').value || '16384',
+  });
+  updateUploadView();
+  updateConfigButton();
+  toast('API 配置已保存！现在可以上传文档了', 'success');
+}
+
+function renderQuizSelector() {
+  const decks = loadDecks();
+  const names = Object.keys(decks);
+  const sel = document.getElementById('quiz-deck-selector');
+  if (!names.length) {
+    sel.innerHTML = '<p style="color:var(--dim)">暂无题库，先去「📄 生成题库」上传文档</p>';
+  } else {
+    sel.innerHTML = `<p style="color:var(--dim);margin-bottom:10px;">选择题库开始答题：</p>
+      <div class="deck-list">${names.map(n =>
+        `<div class="deck-card" onclick="startQuiz('${esc(n)}')">
+          <div><div class="name">${esc(n)}</div></div>
+          <div class="count">${decks[n].cards.length} 题</div>
+        </div>`).join('')}</div>`;
   }
 }
 
@@ -700,9 +819,7 @@ function openSettings() {
   document.getElementById('cfg-max-tokens').value = cfg.max_tokens || '16384';
   document.getElementById('settings-modal').classList.remove('hidden');
 }
-
 function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
-
 function saveSettings() {
   saveLLMSettingsObj({
     api_key: document.getElementById('cfg-api-key').value.trim(),
@@ -711,23 +828,27 @@ function saveSettings() {
     max_tokens: document.getElementById('cfg-max-tokens').value || '16384',
   });
   closeSettings();
-  updateGearBadge();
+  updateUploadView();
+  updateConfigButton();
   toast('配置已保存', 'success');
 }
 
-function updateGearBadge() {
+function updateConfigButton() {
   const cfg = getLLMSettings();
-  const btn = document.getElementById('gear-btn');
-  if (cfg.api_key) { btn.classList.add('configured'); btn.title = `已配置: ${cfg.model || 'LLM'}`; }
-  else { btn.classList.remove('configured'); btn.title = 'LLM 配置（未设置）'; }
+  const btn = document.getElementById('config-btn');
+  if (cfg.api_key) {
+    btn.classList.add('configured');
+    btn.textContent = '⚡ 已配置: ' + (cfg.model || 'LLM');
+  } else {
+    btn.classList.remove('configured');
+    btn.textContent = '⚡ 配置API';
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════════
-function esc(s) {
-  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
-}
+function esc(s) { const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
 
 function formatMD(text) {
   if (!text) return '';
@@ -754,7 +875,8 @@ function toast(msg, type) {
 // Init
 // ═══════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-  updateGearBadge();
+  updateConfigButton();
+  updateUploadView();
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 });
 
