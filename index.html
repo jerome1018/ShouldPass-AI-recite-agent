@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>recite — AI 背诵教官</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --border: #30363d;
+    --text: #c9d1d9; --dim: #8b949e; --green: #7ee787;
+    --red: #f85149; --yellow: #d2a563; --blue: #79c0ff; --orange: #ffa657;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 14px 24px; display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px;
+  }
+  header h1 { font-size: 19px; font-weight: 600; }
+  header .badge { font-size: 11px; color: var(--dim); }
+  header .right { display: flex; align-items: center; gap: 10px; }
+  header .gear-btn {
+    background: none; border: 1px solid var(--border); color: var(--dim);
+    font-size: 15px; cursor: pointer; border-radius: var(--radius); padding: 6px 11px; transition: .15s;
+  }
+  header .gear-btn:hover { color: var(--text); border-color: var(--text); }
+  header .gear-btn.configured { color: var(--green); border-color: var(--green); }
+  nav { display: flex; gap: 6px; }
+  nav button {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 7px 14px; border-radius: var(--radius); cursor: pointer; font-size: 13px; transition: .15s;
+  }
+  nav button:hover { background: #1c2333; }
+  nav button.active { border-color: var(--blue); color: var(--blue); }
+  main { flex: 1; max-width: 900px; width: 100%; margin: 24px auto; padding: 0 24px; }
+
+  /* Dropzone */
+  .dropzone {
+    border: 2px dashed var(--border); border-radius: var(--radius); padding: 50px 24px;
+    text-align: center; cursor: pointer; transition: .2s; margin-bottom: 20px;
+  }
+  .dropzone:hover, .dropzone.dragover { border-color: var(--blue); background: #0d1b2b; }
+  .dropzone .icon { font-size: 44px; margin-bottom: 10px; }
+  .dropzone .hint { color: var(--dim); font-size: 12px; margin-top: 6px; }
+  .file-input { display: none; }
+
+  /* Deck list */
+  .deck-list { display: grid; gap: 10px; }
+  .deck-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 18px; cursor: pointer; transition: .15s;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .deck-card:hover { border-color: var(--blue); }
+  .deck-card .name { font-weight: 600; font-size: 14px; }
+  .deck-card .meta { color: var(--dim); font-size: 11px; margin-top: 3px; }
+  .deck-card .count { color: var(--blue); font-size: 13px; }
+  .deck-card .actions { display: flex; gap: 6px; }
+  .deck-card .del-btn {
+    background: none; border: 1px solid var(--border); color: var(--dim);
+    font-size: 12px; cursor: pointer; border-radius: 4px; padding: 3px 8px;
+  }
+  .deck-card .del-btn:hover { color: var(--red); border-color: var(--red); }
+
+  /* Quiz */
+  .quiz-header {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px 22px; margin-bottom: 16px;
+  }
+  .quiz-header .question { font-size: 17px; font-weight: 600; line-height: 1.6; }
+  .quiz-header .meta { color: var(--dim); font-size: 12px; margin-top: 6px; }
+  .quiz-header .keywords { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .quiz-header .kw {
+    font-size: 11px; background: #1a2332; color: var(--blue);
+    padding: 2px 9px; border-radius: 10px; border: 1px solid #1f3a5f;
+  }
+  textarea {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text); padding: 14px;
+    font-size: 14px; line-height: 1.7; resize: vertical; min-height: 140px; font-family: inherit;
+  }
+  textarea:focus { outline: none; border-color: var(--blue); }
+  .btn-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  button.primary {
+    background: #238636; border: none; color: #fff; padding: 9px 22px;
+    border-radius: var(--radius); font-size: 14px; cursor: pointer; font-weight: 600;
+  }
+  button.primary:hover { background: #2ea043; }
+  button.secondary {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 22px; border-radius: var(--radius); font-size: 14px; cursor: pointer;
+  }
+  button.secondary:hover { background: #1c2333; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Evaluation card */
+  .eval-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px; margin-top: 18px; line-height: 1.8; font-size: 14px;
+  }
+  .eval-card h3 { margin: 14px 0 6px; font-size: 15px; }
+  .eval-card ul { padding-left: 18px; }
+  .eval-card li { margin: 3px 0; }
+  .score-badge { display: inline-block; font-size: 22px; font-weight: 700; padding: 3px 14px; border-radius: var(--radius); }
+  .score-high { background: #0f2e1a; color: var(--green); border: 1px solid #1a5c3a; }
+  .score-mid { background: #2e240a; color: var(--orange); border: 1px solid #5c401a; }
+  .score-low { background: #2e0f0f; color: var(--red); border: 1px solid #5c1a1a; }
+
+  /* Summary */
+  .summary .row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 0; border-bottom: 1px solid var(--border);
+  }
+  .summary .stars { color: var(--yellow); font-size: 15px; letter-spacing: 2px; }
+
+  /* Progress bar */
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 10px; }
+  .progress-bar .fill { height: 100%; background: var(--green); border-radius: 2px; transition: .3s; }
+
+  /* States */
+  .loading { text-align: center; padding: 36px; color: var(--dim); }
+  .spinner {
+    display: inline-block; width: 30px; height: 30px;
+    border: 3px solid var(--border); border-top-color: var(--blue);
+    border-radius: 50%; animation: spin .8s linear infinite; margin-bottom: 10px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty { text-align: center; padding: 60px 24px; color: var(--dim); }
+  .empty .icon { font-size: 40px; margin-bottom: 10px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; top: 16px; right: 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 10px 18px; border-radius: var(--radius); font-size: 13px; z-index: 999;
+    animation: fadeIn .2s; max-width: 350px;
+  }
+  .toast.error { border-color: var(--red); color: var(--red); }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.6);
+    display: flex; align-items: center; justify-content: center; z-index: 1000;
+  }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 26px; width: 450px; max-width: 90vw;
+  }
+  .modal h2 { font-size: 17px; margin-bottom: 16px; }
+  .modal label { display: block; font-size: 12px; color: var(--dim); margin: 10px 0 3px; }
+  .modal input {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    color: var(--text); padding: 9px 11px; border-radius: var(--radius); font-size: 13px; font-family: monospace;
+  }
+  .modal input:focus { outline: none; border-color: var(--blue); }
+  .modal .hint { font-size: 11px; color: var(--dim); margin-top: 3px; }
+  .modal .btn-row { justify-content: flex-end; }
+
+  .hidden { display: none !important; }
+
+  /* Chunk progress */
+  .chunk-progress { margin-top: 10px; font-size: 12px; color: var(--dim); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🧠 recite</h1>
+    <span class="badge">AI-powered knowledge quiz · 纯浏览器运行</span>
+  </div>
+  <div class="right">
+    <nav>
+      <button id="nav-upload" class="active" onclick="showTab('upload')">📄 生成题库</button>
+      <button id="nav-decks" onclick="showTab('decks')">📚 题库列表</button>
+      <button id="nav-quiz" onclick="showTab('quiz')">✏️ 答题</button>
+    </nav>
+    <button class="gear-btn" id="gear-btn" onclick="openSettings()" title="LLM 配置">⚙️</button>
+  </div>
+</header>
+
+<!-- Settings modal -->
+<div class="modal-overlay hidden" id="settings-modal">
+  <div class="modal">
+    <h2>⚙️ LLM API 配置</h2>
+    <p style="color:var(--dim);font-size:12px;margin-bottom:6px;">
+      输入你自己的 API Key，所有请求直接从浏览器发送，不会经过任何服务器。
+    </p>
+    <label>API Key（必填）</label>
+    <input type="password" id="cfg-api-key" placeholder="sk-xxxxxxxx" autocomplete="off">
+    <label>Base URL</label>
+    <input type="text" id="cfg-base-url" placeholder="https://api.deepseek.com">
+    <div class="hint">DeepSeek: https://api.deepseek.com | OpenAI: https://api.openai.com/v1</div>
+    <label>Model</label>
+    <input type="text" id="cfg-model" placeholder="deepseek-chat">
+    <div class="hint">如 deepseek-chat, gpt-4o, qwen-plus, claude-sonnet-4-6 等</div>
+    <label>Max Tokens</label>
+    <input type="number" id="cfg-max-tokens" placeholder="16384" value="16384">
+    <div class="btn-row" style="margin-top:18px;">
+      <button class="secondary" onclick="closeSettings()">取消</button>
+      <button class="primary" onclick="saveSettings()">保存</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <!-- UPLOAD TAB -->
+  <section id="tab-upload">
+    <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+      <div class="icon">📤</div>
+      <div>拖拽文档到此处，或点击上传</div>
+      <div class="hint">支持 .md / .txt / .pdf / .docx — 直接调用 LLM API 梳理题库（需要先配置 ⚙️）</div>
+    </div>
+    <input type="file" id="fileInput" class="file-input" accept=".md,.txt,.pdf,.docx" onchange="handleUpload(this.files[0])">
+    <div id="upload-status" class="hidden"></div>
+  </section>
+
+  <!-- DECKS TAB -->
+  <section id="tab-decks" class="hidden">
+    <div id="deck-list-container"></div>
+  </section>
+
+  <!-- QUIZ TAB -->
+  <section id="tab-quiz" class="hidden">
+    <div id="quiz-empty" class="empty">
+      <div class="icon">📚</div>
+      <p>选择一个题库开始答题</p>
+      <div id="quiz-deck-selector" style="margin-top:14px;"></div>
+    </div>
+    <div id="quiz-active" class="hidden">
+      <div class="quiz-header">
+        <div class="question" id="quiz-question"></div>
+        <div class="meta"><span id="quiz-progress-text"></span></div>
+        <div class="progress-bar"><div class="fill" id="quiz-progress-bar" style="width:0%"></div></div>
+        <div class="keywords" id="quiz-keywords"></div>
+      </div>
+      <textarea id="quiz-answer" placeholder="输入你的答案...（支持多行，Cmd/Ctrl+Enter 提交）"></textarea>
+      <div class="btn-row">
+        <button class="primary" id="btn-submit" onclick="submitAnswer()">提交答案</button>
+        <button class="secondary" id="btn-skip" onclick="nextQuestion()">跳过</button>
+        <button class="secondary" id="btn-finish" onclick="finishQuiz()">结束答题</button>
+      </div>
+      <div id="eval-container"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// LLM Client (browser-side)
+// ═══════════════════════════════════════════════════════════
+function getLLMSettings() {
+  try { return JSON.parse(localStorage.getItem('recite_llm') || '{}'); } catch { return {}; }
+}
+
+function saveLLMSettingsObj(cfg) { localStorage.setItem('recite_llm', JSON.stringify(cfg)); }
+
+async function callLLM(messages, temperature = 0.3, maxTokens = null) {
+  const cfg = getLLMSettings();
+  if (!cfg.api_key) throw new Error('请先点击 ⚙️ 配置 API Key');
+  const baseUrl = (cfg.base_url || 'https://api.deepseek.com').replace(/\/+$/, '');
+  const res = await fetch(baseUrl + '/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.api_key },
+    body: JSON.stringify({
+      model: cfg.model || 'deepseek-chat',
+      messages,
+      temperature,
+      max_tokens: maxTokens || parseInt(cfg.max_tokens) || 16384,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  return data.choices[0].message.content;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Document Reader
+// ═══════════════════════════════════════════════════════════
+async function readDocument(file) {
+  const ext = '.' + file.name.split('.').pop().toLowerCase();
+  if (['.md', '.txt', '.markdown', '.rst', '.org'].includes(ext)) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+  }
+  if (ext === '.pdf') {
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    const pages = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      pages.push(content.items.map(it => it.str).join(' '));
+    }
+    return pages.join('\n\n');
+  }
+  if (ext === '.docx') {
+    const buf = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer: buf });
+    return result.value;
+  }
+  throw new Error('Unsupported format: ' + ext);
+}
+
+// ═══════════════════════════════════════════════════════════
+// Card Generator (JS port from card_generator.py)
+// ═══════════════════════════════════════════════════════════
+const CARD_SYSTEM_PROMPT = `你是一个知识题库整理助手。用户会提供一份包含题目和参考答案的文档片段，请你：
+
+1. 仔细阅读文档，提取出每一道题目及其参考答案。
+2. 为每道题提炼 3-6 个关键词（keywords），覆盖答案的核心要点。
+3. 将每道题的参考答案润色整理，使其更条理清晰，但不要丢失任何关键信息。
+
+请严格按照以下 JSON 数组格式输出，不要输出任何其他内容：
+
+\`\`\`json
+[
+  {
+    "question": "题目内容",
+    "reference_answer": "梳理后的参考答案，条理清晰",
+    "keywords": ["关键词1", "关键词2", "关键词3"]
+  }
+]
+\`\`\`
+
+注意：
+- 如果文档片段中已经明确划分了题目，就按原题数量输出。
+- 如果文档片段中没有明确题目、是纯论述，可以根据内容逻辑拆分为 2-5 道合适的题目，也可以返回空数组 []。
+- keywords 必须精准、具体，不要使用过于宽泛的词汇。`;
+
+const CHUNK_SIZE = 30000;
+
+function parseLLMResponse(response) {
+  if (!response) return [];
+  try { return JSON.parse(response); } catch {}
+  const m = response.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (m) { try { return JSON.parse(m[1]); } catch {} }
+  const m2 = response.match(/\[\s*\{[\s\S]*\}\s*\]/);
+  if (m2) { try { return JSON.parse(m2[0]); } catch {} }
+  return [];
+}
+
+function splitByHeaders(text) {
+  const sections = text.split(/\n(?=#{1,3}\s)/);
+  if (sections.length <= 1) {
+    const paragraphs = text.split('\n\n');
+    const chunks = [];
+    let cur = '';
+    for (const p of paragraphs) {
+      if (cur.length + p.length > CHUNK_SIZE && cur) { chunks.push(cur); cur = p; }
+      else cur = (cur + '\n\n' + p).trim();
+    }
+    if (cur) chunks.push(cur);
+    return chunks.length > 1 ? chunks : [text];
+  }
+  const chunks = [];
+  let cur = '';
+  for (const s of sections) {
+    if (cur.length + s.length > CHUNK_SIZE && cur) { chunks.push(cur); cur = s; }
+    else cur = (cur + '\n' + s).trim();
+  }
+  if (cur) chunks.push(cur);
+  return chunks.length ? chunks : [text];
+}
+
+async function generateCardsFromText(docText, onProgress) {
+  let allCards = [];
+  if (docText.length > CHUNK_SIZE) {
+    const chunks = splitByHeaders(docText);
+    if (onProgress) onProgress({ type: 'chunks', total: chunks.length });
+    for (let i = 0; i < chunks.length; i++) {
+      if (onProgress) onProgress({ type: 'chunk', idx: i, total: chunks.length, preview: chunks[i].trim().slice(0, 40) });
+      const resp = await callLLM([
+        { role: 'system', content: CARD_SYSTEM_PROMPT },
+        { role: 'user', content: chunks[i] },
+      ], 0.3, 16384);
+      const cards = parseLLMResponse(resp);
+      allCards = allCards.concat(cards);
+      if (onProgress) onProgress({ type: 'chunk_done', idx: i, count: cards.length });
+    }
+  } else {
+    const resp = await callLLM([
+      { role: 'system', content: CARD_SYSTEM_PROMPT },
+      { role: 'user', content: docText },
+    ], 0.3, 16384);
+    allCards = parseLLMResponse(resp);
+  }
+  // Assign IDs
+  allCards.forEach((c, i) => { if (!c.id) c.id = i; });
+  return allCards;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Deck Storage (localStorage)
+// ═══════════════════════════════════════════════════════════
+function loadDecks() {
+  try { return JSON.parse(localStorage.getItem('recite_decks') || '{}'); } catch { return {}; }
+}
+
+function saveDecks(decks) { localStorage.setItem('recite_decks', JSON.stringify(decks)); }
+
+function saveDeck(name, cards) {
+  const decks = loadDecks();
+  decks[name] = {
+    name, cards,
+    created_at: new Date().toISOString(),
+    history: decks[name]?.history || [],
+  };
+  saveDecks(decks);
+}
+
+function deleteDeck(name) {
+  const decks = loadDecks();
+  delete decks[name];
+  saveDecks(decks);
+}
+
+function loadHistory(deckName) {
+  const decks = loadDecks();
+  return decks[deckName]?.history || [];
+}
+
+function saveHistory(deckName, records) {
+  const decks = loadDecks();
+  if (decks[deckName]) {
+    decks[deckName].history = (decks[deckName].history || []).concat(records);
+    saveDecks(decks);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Quiz Session
+// ═══════════════════════════════════════════════════════════
+const EVAL_SYSTEM_PROMPT = `你是一个严格的知识背诵考官。请用中文评价用户的回答。
+
+评价标准：
+1. 指出用户回答中**正确**的部分
+2. 指出用户回答中**遗漏**的关键点
+3. 指出用户回答中**错误或不准确**的地方
+4. 给出 1-5 分的评分
+
+请用以下 Markdown 格式回复：
+
+### 评分：X/5
+
+**✅ 正确的部分**
+- ...
+
+**❌ 遗漏的关键点**
+- ...
+
+**⚠️ 错误/不准确**
+- ...
+
+**📝 参考答案**
+（完整参考答案）`;
+
+let quizState = null;
+
+function startQuiz(deckName) {
+  const decks = loadDecks();
+  const deck = decks[deckName];
+  if (!deck || !deck.cards.length) { toast('题库为空', 'error'); return; }
+  quizState = {
+    deckName,
+    cards: deck.cards.map((c, i) => { c.id = c.id ?? i; return c; }),
+    attempted: {},
+    history: [],
+  };
+  document.getElementById('quiz-empty').classList.add('hidden');
+  document.getElementById('quiz-active').classList.remove('hidden');
+  showTab('quiz');
+  nextQuestion();
+}
+
+async function nextQuestion() {
+  if (!quizState) return;
+  document.getElementById('eval-container').innerHTML = '';
+  document.getElementById('quiz-answer').value = '';
+  document.getElementById('btn-submit').disabled = false;
+
+  const cards = quizState.cards;
+  const attempted = quizState.attempted;
+  if (Object.keys(attempted).length >= cards.length) { finishQuiz(); return; }
+
+  const unattempted = cards.filter(c => !(c.id in attempted));
+  const pick = unattempted.length ? unattempted[Math.floor(Math.random() * unattempted.length)]
+    : cards.filter(c => (attempted[c.id]?.score || 0) < 3).sort((a, b) => (attempted[a.id]?.score || 0) - (attempted[b.id]?.score || 0))[0] || cards[0];
+
+  quizState.currentCard = pick;
+  document.getElementById('quiz-question').textContent = pick.question;
+  document.getElementById('quiz-progress-text').textContent = `已答 ${Object.keys(attempted).length} / ${cards.length} 题`;
+  document.getElementById('quiz-progress-bar').style.width = (Object.keys(attempted).length / cards.length * 100) + '%';
+  document.getElementById('quiz-keywords').innerHTML = (pick.keywords || []).map(k => `<span class="kw">${esc(k)}</span>`).join('');
+  document.getElementById('quiz-keywords').style.display = 'flex';
+  document.getElementById('quiz-answer').focus();
+}
+
+async function submitAnswer() {
+  if (!quizState || !quizState.currentCard) return;
+  const answer = document.getElementById('quiz-answer').value.trim();
+  if (!answer) { toast('请输入答案再提交', 'error'); return; }
+
+  document.getElementById('btn-submit').disabled = true;
+  const evalDiv = document.getElementById('eval-container');
+  evalDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>LLM 正在评价...</p></div>';
+
+  const card = quizState.currentCard;
+  try {
+    const resp = await callLLM([
+      { role: 'system', content: EVAL_SYSTEM_PROMPT },
+      { role: 'user', content: `题目：${card.question}\n\n参考答案：${card.reference_answer}\n\n关键词：${card.keywords.join(', ')}\n\n用户的回答：\n${answer}\n\n请评价。` },
+    ], 0.3);
+
+    const m = resp.match(/评分[：:]\s*(\d)\/5/);
+    const score = m ? parseInt(m[1]) : -1;
+
+    quizState.attempted[card.id] = { score, answer, ts: new Date().toISOString() };
+    quizState.history.push({ question: card.question, score, answer, evaluation: resp });
+
+    const scoreClass = score >= 4 ? 'score-high' : score >= 2 ? 'score-mid' : 'score-low';
+    const stars = '★'.repeat(Math.max(0, score)) + '☆'.repeat(Math.max(0, 5 - score));
+
+    evalDiv.innerHTML = `
+      <div class="eval-card">
+        <div class="score-badge ${scoreClass}">${stars} ${score}/5</div>
+        <div style="margin-top:14px;">${formatMD(resp)}</div>
+      </div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="primary" onclick="nextQuestion()">下一题 →</button>
+        <button class="secondary" onclick="finishQuiz()">结束答题</button>
+      </div>`;
+
+    document.getElementById('quiz-progress-text').textContent = `已答 ${Object.keys(quizState.attempted).length} / ${quizState.cards.length} 题`;
+    document.getElementById('quiz-progress-bar').style.width = (Object.keys(quizState.attempted).length / quizState.cards.length * 100) + '%';
+
+  } catch (e) {
+    evalDiv.innerHTML = `<span style="color:var(--red)">评价失败: ${esc(e.message)}</span>`;
+    document.getElementById('btn-submit').disabled = false;
+  }
+}
+
+async function finishQuiz() {
+  if (!quizState) return;
+  document.getElementById('btn-submit').disabled = true;
+
+  const history = quizState.history;
+  const scores = history.map(h => h.score).filter(s => s >= 0);
+  const avg = scores.length ? (scores.reduce((a,b) => a+b, 0) / scores.length).toFixed(1) : 0;
+
+  saveHistory(quizState.deckName, history);
+
+  const evalDiv = document.getElementById('eval-container');
+  evalDiv.innerHTML = `<div class="eval-card">
+    <h3>📊 答题总结</h3>
+    <p style="font-size:18px;margin:10px 0;">平均分: <strong>${avg}/5</strong> | 共答 ${history.length}/${quizState.cards.length} 题</p>
+    <div class="summary">
+      ${history.map(h => {
+        const s = h.score || 0;
+        return `<div class="row"><span>${esc(h.question)}</span><span class="stars">${'★'.repeat(Math.max(0,s))}${'☆'.repeat(Math.max(0,5-s))}</span></div>`;
+      }).join('')}
+    </div>
+    <div class="btn-row" style="margin-top:14px;">
+      <button class="secondary" onclick="showTab('decks');renderDecks()">返回题库</button>
+    </div>
+  </div>`;
+
+  document.getElementById('quiz-progress-bar').style.width = '100%';
+  document.getElementById('quiz-progress-text').textContent = `完成！${history.length} 题`;
+  quizState = null;
+}
+
+// ═══════════════════════════════════════════════════════════
+// UI: Upload
+// ═══════════════════════════════════════════════════════════
+const dropzone = document.getElementById('dropzone');
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault(); dropzone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleUpload(e.dataTransfer.files[0]);
+});
+
+async function handleUpload(file) {
+  if (!file) return;
+  const cfg = getLLMSettings();
+  if (!cfg.api_key) { toast('请先点击右上角 ⚙️ 配置 API Key', 'error'); openSettings(); return; }
+
+  const status = document.getElementById('upload-status');
+  status.classList.remove('hidden');
+  status.innerHTML = '<div class="loading"><div class="spinner"></div><p>正在解析文档...</p></div>';
+
+  try {
+    const docText = await readDocument(file);
+    status.innerHTML = `<div class="loading"><div class="spinner"></div><p>文档已解析（${docText.length.toLocaleString()} 字符），正在调用 LLM 梳理题目...</p><p style="font-size:12px;color:var(--dim)">大文件可能需要 1-3 分钟，请耐心等待</p><div class="chunk-progress" id="chunk-progress"></div></div>`;
+
+    const cards = await generateCardsFromText(docText, (ev) => {
+      const cp = document.getElementById('chunk-progress');
+      if (cp) {
+        if (ev.type === 'chunks') cp.textContent = `已分 ${ev.total} 个片段，逐段处理中...`;
+        else if (ev.type === 'chunk') cp.textContent = `处理片段 ${ev.idx+1}/${ev.total}: ${ev.preview}...`;
+        else if (ev.type === 'chunk_done') cp.textContent = `片段 ${ev.idx+1}/${ev.total} 完成，提取 ${ev.count} 题`;
+      }
+    });
+
+    if (!cards.length) { status.innerHTML = '<div class="eval-card"><span style="color:var(--red)">LLM 未返回有效题目，请重试</span></div>'; return; }
+
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    saveDeck(baseName, cards);
+
+    status.innerHTML = `<div class="eval-card">
+      <span style="color:var(--green);font-weight:600;">✅ 题库生成成功！</span>
+      <p style="margin-top:10px;"><strong>${esc(baseName)}</strong> — ${cards.length} 道题目</p>
+      <div style="margin-top:6px;max-height:280px;overflow-y:auto;">
+        ${cards.map((c,i) => `<div style="padding:3px 0;border-bottom:1px solid var(--border);font-size:12px;">${i+1}. ${esc(c.question)}</div>`).join('')}
+      </div>
+      <button class="primary" style="margin-top:10px;" onclick="startQuiz('${esc(baseName)}')">开始答题 →</button>
+    </div>`;
+    toast('题库生成成功！', 'success');
+  } catch (e) {
+    status.innerHTML = `<div class="eval-card"><span style="color:var(--red)">错误：${esc(e.message)}</span></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// UI: Decks
+// ═══════════════════════════════════════════════════════════
+function renderDecks() {
+  const decks = loadDecks();
+  const container = document.getElementById('deck-list-container');
+  const names = Object.keys(decks);
+  if (!names.length) {
+    container.innerHTML = '<div class="empty"><div class="icon">📭</div><p>暂无题库，去上传文档生成吧</p></div>';
+    return;
+  }
+  container.innerHTML = `<div class="deck-list">${names.map(name => {
+    const d = decks[name];
+    const historyCount = (d.history || []).length;
+    return `<div class="deck-card">
+      <div style="flex:1" onclick="startQuiz('${esc(name)}')">
+        <div class="name">📚 ${esc(name)}</div>
+        <div class="meta">${d.cards.length} 题 · ${historyCount} 次作答记录 · 创建于 ${(d.created_at||'').slice(0,10)}</div>
+      </div>
+      <div class="actions">
+        <span style="color:var(--blue);font-size:13px;">${d.cards.length} 题</span>
+        <button class="del-btn" onclick="event.stopPropagation();deleteDeck('${esc(name)}');renderDecks();toast('已删除: ${esc(name)}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// UI: Tabs & Settings
+// ═══════════════════════════════════════════════════════════
+function showTab(name) {
+  ['upload','decks','quiz'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('hidden', t !== name);
+    document.getElementById('nav-' + t).classList.toggle('active', t === name);
+  });
+  if (name === 'decks') renderDecks();
+  if (name === 'quiz') {
+    const decks = loadDecks();
+    const names = Object.keys(decks);
+    const sel = document.getElementById('quiz-deck-selector');
+    if (!names.length) {
+      sel.innerHTML = '<p style="color:var(--dim)">暂无题库，先去生成吧</p>';
+    } else {
+      sel.innerHTML = `<p style="color:var(--dim);margin-bottom:10px;">选择题库：</p>
+        <div class="deck-list">${names.map(n =>
+          `<div class="deck-card" onclick="startQuiz('${esc(n)}')">
+            <div><div class="name">${esc(n)}</div></div>
+            <div class="count">${decks[n].cards.length} 题</div>
+          </div>`).join('')}</div>`;
+    }
+  }
+}
+
+function openSettings() {
+  const cfg = getLLMSettings();
+  document.getElementById('cfg-api-key').value = cfg.api_key || '';
+  document.getElementById('cfg-base-url').value = cfg.base_url || '';
+  document.getElementById('cfg-model').value = cfg.model || '';
+  document.getElementById('cfg-max-tokens').value = cfg.max_tokens || '16384';
+  document.getElementById('settings-modal').classList.remove('hidden');
+}
+
+function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
+
+function saveSettings() {
+  saveLLMSettingsObj({
+    api_key: document.getElementById('cfg-api-key').value.trim(),
+    base_url: document.getElementById('cfg-base-url').value.trim().replace(/\/+$/, ''),
+    model: document.getElementById('cfg-model').value.trim(),
+    max_tokens: document.getElementById('cfg-max-tokens').value || '16384',
+  });
+  closeSettings();
+  updateGearBadge();
+  toast('配置已保存', 'success');
+}
+
+function updateGearBadge() {
+  const cfg = getLLMSettings();
+  const btn = document.getElementById('gear-btn');
+  if (cfg.api_key) { btn.classList.add('configured'); btn.title = `已配置: ${cfg.model || 'LLM'}`; }
+  else { btn.classList.remove('configured'); btn.title = 'LLM 配置（未设置）'; }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Helpers
+// ═══════════════════════════════════════════════════════════
+function esc(s) {
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+function formatMD(text) {
+  if (!text) return '';
+  return esc(text)
+    .replace(/### (.+)/g, '<h3>$1</h3>')
+    .replace(/## (.+)/g, '<h3>$1</h3>')
+    .replace(/^- (.+)/gm, '<li>$1</li>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+    .replace(/<\/li>\n<li>/g, '</li><li>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function toast(msg, type) {
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || '');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  updateGearBadge();
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+});
+
+document.getElementById('settings-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSettings();
+});
+
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    if (!document.getElementById('tab-quiz').classList.contains('hidden')
+        && !document.getElementById('quiz-active').classList.contains('hidden')) {
+      submitAnswer();
+    }
+  }
+});
+</script>
+</body>
+</html>
