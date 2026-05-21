@@ -2,6 +2,7 @@ import json
 import os
 import re
 
+from .document_reader import read_document
 from .llm_client import chat
 from .storage import save_cards
 
@@ -33,16 +34,14 @@ CHUNK_SIZE = 30000
 
 
 def generate_cards(document_path):
-    if not os.path.exists(document_path):
-        raise FileNotFoundError(f"Document not found: {document_path}")
+    ext = os.path.splitext(document_path)[1].lower()
+    print(f"正在读取文档: {document_path} ({ext})")
 
-    with open(document_path, "r", encoding="utf-8") as f:
-        doc_text = f.read()
+    doc_text = read_document(document_path)
 
     if not doc_text.strip():
-        raise ValueError("Document is empty")
+        raise ValueError("Document is empty or could not be parsed")
 
-    print(f"正在读取文档: {document_path}")
     print(f"文档长度: {len(doc_text)} 字符")
 
     # 大文档分片处理
