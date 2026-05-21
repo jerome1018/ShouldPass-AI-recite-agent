@@ -29,12 +29,26 @@ pip install -r requirements.txt
 
 # 2. Configure your LLM API key in config.yaml
 
-# 3. Generate cards from your study document
+# 3. Generate cards from your study document (supports .md / .txt / .pdf / .docx)
 python -m recite generate documents/my_notes.md
 
 # 4. Get quizzed
 python -m recite quiz my_notes
 ```
+
+---
+
+## Supported Formats
+
+Drop in whatever you have — notes, papers, interview prep docs:
+
+| Format | Extension | Library |
+|---|---|---|
+| Markdown / Plain text | `.md` `.txt` | built-in |
+| PDF | `.pdf` | pymupdf |
+| Word | `.docx` | python-docx |
+
+Large documents (132k+ chars) are automatically split by headings and processed in parallel — no manual chunking needed.
 
 ---
 
@@ -74,6 +88,7 @@ When you answer, the LLM cross-checks your response against every keyword — if
 
 ## Pro Tips
 
+- **Throw in any format.** `.md`, `.txt`, `.pdf`, `.docx` — recite parses them all.
 - **Make your source docs detailed.** The better the reference answers, the harsher (and more useful) the grading.
 - **Don't skip the hard ones.** recite prioritizes questions you've bombed before.
 - **Use any LLM.** OpenAI, DeepSeek, Ollama, Groq — anything with an OpenAI-compatible endpoint works.
@@ -117,12 +132,26 @@ pip install -r requirements.txt
 
 # 2. 在 config.yaml 里配置你的 LLM API key
 
-# 3. 从学习文档生成题库
+# 3. 从学习文档生成题库（支持 .md / .txt / .pdf / .docx）
 python -m recite generate documents/我的笔记.md
 
 # 4. 开始答题
 python -m recite quiz 我的笔记
 ```
+
+---
+
+## 支持格式
+
+什么格式都能扔进来——笔记、论文、面试八股文：
+
+| 格式 | 扩展名 | 依赖库 |
+|---|---|---|
+| Markdown / 纯文本 | `.md` `.txt` | 无 |
+| PDF | `.pdf` | pymupdf |
+| Word | `.docx` | python-docx |
+
+大文档（超过 13 万字）会自动按标题分片并行处理，无需手动切割。
 
 ---
 
@@ -162,6 +191,7 @@ python -m recite quiz 我的笔记
 
 ## 使用技巧
 
+- **什么格式都能扔进来。** `.md`、`.txt`、`.pdf`、`.docx`——recite 全支持。
 - **源文档写得越详细，批改越狠（也越有用）。** 参考答案质量决定评价质量。
 - **别跳过难题。** recite 会优先抽查你之前翻车过的题目。
 - **什么 LLM 都能接。** OpenAI、DeepSeek、Ollama、Groq——只要支持 OpenAI 兼容接口就能用。
