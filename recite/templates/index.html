@@ -37,6 +37,14 @@
   }
   header h1 { font-size: 20px; font-weight: 600; }
   header .badge { font-size: 12px; color: var(--dim); }
+  header .right { display: flex; align-items: center; gap: 12px; }
+  header .gear-btn {
+    background: none; border: 1px solid var(--border); color: var(--dim);
+    font-size: 16px; cursor: pointer; border-radius: var(--radius);
+    padding: 6px 12px; transition: .15s;
+  }
+  header .gear-btn:hover { color: var(--text); border-color: var(--text); }
+  header .gear-btn.configured { color: var(--green); border-color: var(--green); }
   nav { display: flex; gap: 8px; }
   nav button {
     background: var(--surface);
@@ -209,6 +217,26 @@
 
   /* Hidden sections */
   .hidden { display: none !important; }
+
+  /* Settings modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.6);
+    display: flex; align-items: center; justify-content: center; z-index: 1000;
+  }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 28px; width: 460px; max-width: 90vw;
+  }
+  .modal h2 { font-size: 18px; margin-bottom: 20px; }
+  .modal label { display: block; font-size: 13px; color: var(--dim); margin: 12px 0 4px; }
+  .modal input, .modal select {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 12px; border-radius: var(--radius);
+    font-size: 14px; font-family: monospace;
+  }
+  .modal input:focus, .modal select:focus { outline: none; border-color: var(--blue); }
+  .modal .hint { font-size: 12px; color: var(--dim); margin-top: 4px; }
+  .modal .btn-row { justify-content: flex-end; }
 </style>
 </head>
 <body>
@@ -218,12 +246,37 @@
     <h1>🧠 recite</h1>
     <span class="badge">AI-powered knowledge quiz</span>
   </div>
-  <nav>
-    <button id="nav-upload" class="active" onclick="showSection('upload')">📄 生成题库</button>
-    <button id="nav-decks" onclick="showSection('decks')">📚 题库列表</button>
-    <button id="nav-quiz" onclick="showSection('quiz')">✏️ 答题</button>
-  </nav>
+  <div class="right">
+    <nav>
+      <button id="nav-upload" class="active" onclick="showSection('upload')">📄 生成题库</button>
+      <button id="nav-decks" onclick="showSection('decks')">📚 题库列表</button>
+      <button id="nav-quiz" onclick="showSection('quiz')">✏️ 答题</button>
+    </nav>
+    <button class="gear-btn" id="gear-btn" onclick="openSettings()" title="LLM 配置">⚙️</button>
+  </div>
 </header>
+
+<!-- Settings modal -->
+<div class="modal-overlay hidden" id="settings-modal">
+  <div class="modal">
+    <h2>⚙️ LLM API 配置</h2>
+    <p style="color:var(--dim);font-size:13px;margin-bottom:8px;">
+      输入你自己的 API Key，所有请求将使用你的密钥。保存在浏览器本地，不会上传到服务器。
+    </p>
+    <label>API Key（必填）</label>
+    <input type="password" id="cfg-api-key" placeholder="sk-xxxxxxxx" autocomplete="off">
+    <label>Base URL</label>
+    <input type="text" id="cfg-base-url" placeholder="https://api.deepseek.com">
+    <div class="hint">DeepSeek: api.deepseek.com | OpenAI: api.openai.com/v1 | 其他兼容接口均可</div>
+    <label>Model</label>
+    <input type="text" id="cfg-model" placeholder="deepseek-chat">
+    <div class="hint">如 deepseek-chat, gpt-4o, qwen-plus 等</div>
+    <div class="btn-row" style="margin-top:20px;">
+      <button class="secondary" onclick="closeSettings()">取消</button>
+      <button class="primary" onclick="saveSettings()">保存</button>
+    </div>
+  </div>
+</div>
 
 <main>
   <!-- UPLOAD SECTION -->
@@ -278,6 +331,68 @@ let currentCardId = null;
 let totalCards = 0;
 let attemptedCount = 0;
 
+// ── LLM Settings (localStorage) ────────────────────────────
+function getLLMSettings() {
+  try {
+    return JSON.parse(localStorage.getItem('recite_llm') || '{}');
+  } catch { return {}; }
+}
+
+function saveLLMSettings(cfg) {
+  localStorage.setItem('recite_llm', JSON.stringify(cfg));
+}
+
+function getLLMHeaders() {
+  const cfg = getLLMSettings();
+  const headers = {};
+  if (cfg.api_key) headers['X-API-Key'] = cfg.api_key;
+  if (cfg.base_url) headers['X-Base-URL'] = cfg.base_url;
+  if (cfg.model) headers['X-Model'] = cfg.model;
+  return headers;
+}
+
+function openSettings() {
+  const cfg = getLLMSettings();
+  document.getElementById('cfg-api-key').value = cfg.api_key || '';
+  document.getElementById('cfg-base-url').value = cfg.base_url || '';
+  document.getElementById('cfg-model').value = cfg.model || '';
+  document.getElementById('settings-modal').classList.remove('hidden');
+}
+
+function closeSettings() {
+  document.getElementById('settings-modal').classList.add('hidden');
+}
+
+function saveSettings() {
+  const cfg = {
+    api_key: document.getElementById('cfg-api-key').value.trim(),
+    base_url: document.getElementById('cfg-base-url').value.trim(),
+    model: document.getElementById('cfg-model').value.trim(),
+  };
+  saveLLMSettings(cfg);
+  closeSettings();
+  updateGearBadge();
+  toast('LLM 配置已保存', 'success');
+}
+
+function updateGearBadge() {
+  const cfg = getLLMSettings();
+  const btn = document.getElementById('gear-btn');
+  if (cfg.api_key) {
+    btn.classList.add('configured');
+    btn.title = `已配置: ${cfg.model || 'LLM'}`;
+  } else {
+    btn.classList.remove('configured');
+    btn.title = 'LLM 配置（未设置）';
+  }
+}
+
+// Helper: fetch with LLM headers injected
+async function apiFetch(url, options = {}) {
+  options.headers = { ...(options.headers || {}), ...getLLMHeaders() };
+  return fetch(url, options);
+}
+
 // ── Navigation ─────────────────────────────────────────────
 function showSection(name) {
   currentSection = name;
@@ -309,7 +424,7 @@ async function handleUpload(file) {
   form.append('file', file);
 
   try {
-    const res = await fetch('/api/generate', { method: 'POST', body: form });
+    const res = await apiFetch('/api/generate', { method: 'POST', body: form });
     const data = await res.json();
     if (data.error) {
       status.innerHTML = `<div class="eval-card"><span style="color:var(--red)">错误：${escapeHtml(data.error)}</span></div>`;
@@ -335,7 +450,7 @@ async function handleUpload(file) {
 async function loadDecks() {
   const container = document.getElementById('deck-list-container');
   try {
-    const res = await fetch('/api/decks');
+    const res = await apiFetch('/api/decks');
     const data = await res.json();
     if (!data.decks.length) {
       container.innerHTML = `<div class="empty"><div class="icon">📭</div><p>暂无题库，先去上传文档生成吧</p></div>`;
@@ -357,7 +472,7 @@ async function loadDecks() {
 // ── Quiz ───────────────────────────────────────────────────
 async function loadQuizStart() {
   try {
-    const res = await fetch('/api/decks');
+    const res = await apiFetch('/api/decks');
     const data = await res.json();
     const sel = document.getElementById('quiz-deck-selector');
     if (!data.decks.length) {
@@ -375,7 +490,7 @@ async function loadQuizStart() {
 
 async function startQuiz(deckName) {
   try {
-    const res = await fetch('/api/quiz/start', {
+    const res = await apiFetch('/api/quiz/start', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({deck_name: deckName})
     });
@@ -402,7 +517,7 @@ async function nextQuestion() {
   }
 
   try {
-    const res = await fetch('/api/quiz/next', {
+    const res = await apiFetch('/api/quiz/next', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({session_id: sessionId})
     });
@@ -434,7 +549,7 @@ async function submitAnswer() {
   evalDiv.innerHTML = `<div class="loading"><div class="spinner"></div><p>LLM 正在评价...</p></div>`;
 
   try {
-    const res = await fetch('/api/quiz/submit', {
+    const res = await apiFetch('/api/quiz/submit', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({session_id: sessionId, card_id: currentCardId, answer})
     });
@@ -468,7 +583,7 @@ async function finishQuiz() {
   document.getElementById('btn-submit').disabled = true;
 
   try {
-    const res = await fetch('/api/quiz/summary', {
+    const res = await apiFetch('/api/quiz/summary', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({session_id: sessionId})
     });
@@ -524,6 +639,16 @@ function toast(msg, type) {
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 3000);
 }
+
+// Init on load
+document.addEventListener('DOMContentLoaded', () => {
+  updateGearBadge();
+});
+
+// Close modal on overlay click
+document.getElementById('settings-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSettings();
+});
 
 // Keyboard shortcut: Cmd/Ctrl+Enter to submit
 document.addEventListener('keydown', e => {

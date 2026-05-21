@@ -33,7 +33,12 @@ SYSTEM_PROMPT = """你是一个知识题库整理助手。用户会提供一份�
 CHUNK_SIZE = 30000
 
 
-def generate_cards(document_path):
+def generate_cards(document_path, llm_config=None):
+    """Generate Q&A cards from a document. llm_config is an optional dict
+    with keys: api_key, base_url, model — for per-user API overrides."""
+    if llm_config is None:
+        llm_config = {}
+
     ext = os.path.splitext(document_path)[1].lower()
     print(f"正在读取文档: {document_path} ({ext})")
 
@@ -47,13 +52,14 @@ def generate_cards(document_path):
     # 大文档分片处理
     if len(doc_text) > CHUNK_SIZE:
         print(f"文档较大，按标题分片处理...")
-        all_cards = _process_chunked(doc_text)
+        all_cards = _process_chunked(doc_text, llm_config)
     else:
         print("正在调用 LLM 梳理题目...")
         response = chat(
             [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": doc_text}],
             temperature=0.3,
             max_tokens=16384,
+            **llm_config,
         )
         all_cards = _parse_llm_response(response, debug_prefix="LLM 返回")
 
@@ -74,8 +80,10 @@ def generate_cards(document_path):
     return saved_path
 
 
-def _process_chunked(doc_text):
+def _process_chunked(doc_text, llm_config=None):
     """Split large document by markdown headers and process each section."""
+    if llm_config is None:
+        llm_config = {}
     chunks = _split_by_headers(doc_text)
     print(f"文档分为 {len(chunks)} 个片段，逐个调用 LLM 处理...")
     all_cards = []
@@ -86,6 +94,7 @@ def _process_chunked(doc_text):
             [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": chunk}],
             temperature=0.3,
             max_tokens=16384,
+            **llm_config,
         )
         cards = _parse_llm_response(response, debug_prefix=f"片段 {idx+1} LLM 返回")
         if cards:

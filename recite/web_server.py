@@ -16,6 +16,16 @@ app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), "t
 # In-memory quiz session state: {session_id: {deck_name, history, current_idx, ...}}
 _sessions = {}
 
+
+def _get_llm_config():
+    """Extract per-user LLM config from request headers."""
+    cfg = {}
+    for key in ("x-api-key", "x-base-url", "x-model"):
+        val = request.headers.get(key, "")
+        if val:
+            cfg[key.replace("x-", "").replace("-", "_")] = val
+    return cfg
+
 EVAL_SYSTEM_PROMPT = """你是一个严格的知识背诵考官。请用中文评价用户的回答。
 
 评价标准：
@@ -74,9 +84,9 @@ def api_generate():
         if not doc_text.strip():
             return jsonify({"error": "Document is empty or unreadable"}), 400
 
-        # For large docs, use chunked generation; for small, use built-in
         base_name = os.path.splitext(file.filename)[0]
-        card_path = generate_cards(tmp_path)
+        llm_config = _get_llm_config()
+        card_path = generate_cards(tmp_path, llm_config=llm_config)
         deck = load_cards(base_name)
 
         return jsonify({"success": True, "deck": deck})
@@ -201,7 +211,8 @@ def api_quiz_submit():
 请评价。"""},
     ]
     try:
-        evaluation = chat(messages, temperature=0.3)
+        llm_config = _get_llm_config()
+        evaluation = chat(messages, temperature=0.3, **llm_config)
     except Exception as e:
         evaluation = f"### 评分：-/5\n\n评价出错: {e}"
 
