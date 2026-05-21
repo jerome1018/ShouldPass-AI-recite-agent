@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>recite — AI 背诵教官</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --dim: #8b949e;
+    --green: #7ee787;
+    --red: #f85149;
+    --yellow: #d2a563;
+    --blue: #79c0ff;
+    --orange: #ffa657;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 { font-size: 20px; font-weight: 600; }
+  header .badge { font-size: 12px; color: var(--dim); }
+  nav { display: flex; gap: 8px; }
+  nav button {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 14px;
+    transition: .15s;
+  }
+  nav button:hover { background: #1c2333; }
+  nav button.active { border-color: var(--blue); color: var(--blue); }
+
+  main { flex: 1; max-width: 900px; width: 100%; margin: 24px auto; padding: 0 24px; }
+
+  /* Upload zone */
+  .dropzone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 60px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: .2s;
+    margin-bottom: 24px;
+  }
+  .dropzone:hover, .dropzone.dragover { border-color: var(--blue); background: #0d1b2b; }
+  .dropzone .icon { font-size: 48px; margin-bottom: 12px; }
+  .dropzone .hint { color: var(--dim); font-size: 13px; margin-top: 8px; }
+  .file-input { display: none; }
+
+  /* Deck list */
+  .deck-list { display: grid; gap: 12px; }
+  .deck-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: .15s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .deck-card:hover { border-color: var(--blue); }
+  .deck-card .name { font-weight: 600; font-size: 15px; }
+  .deck-card .meta { color: var(--dim); font-size: 12px; margin-top: 4px; }
+  .deck-card .count { color: var(--blue); font-size: 14px; }
+
+  /* Quiz */
+  .quiz-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  .quiz-header .question { font-size: 18px; font-weight: 600; line-height: 1.6; }
+  .quiz-header .meta { color: var(--dim); font-size: 13px; margin-top: 8px; }
+  .quiz-header .keywords {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+  }
+  .quiz-header .kw {
+    font-size: 11px; background: #1a2332; color: var(--blue);
+    padding: 3px 10px; border-radius: 12px; border: 1px solid #1f3a5f;
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    padding: 16px;
+    font-size: 15px;
+    line-height: 1.7;
+    resize: vertical;
+    min-height: 150px;
+    font-family: inherit;
+  }
+  textarea:focus { outline: none; border-color: var(--blue); }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 16px; }
+  button.primary {
+    background: #238636;
+    border: none;
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: var(--radius);
+    font-size: 15px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  button.primary:hover { background: #2ea043; }
+  button.secondary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 24px;
+    border-radius: var(--radius);
+    font-size: 15px;
+    cursor: pointer;
+  }
+  button.secondary:hover { background: #1c2333; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Evaluation card */
+  .eval-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-top: 20px;
+    line-height: 1.8;
+    font-size: 15px;
+  }
+  .eval-card h3 { margin: 16px 0 8px; font-size: 16px; }
+  .eval-card h3:first-child { margin-top: 0; }
+  .eval-card ul { padding-left: 20px; }
+  .eval-card li { margin: 4px 0; }
+  .eval-card .score-badge {
+    display: inline-block;
+    font-size: 24px;
+    font-weight: 700;
+    padding: 4px 16px;
+    border-radius: var(--radius);
+  }
+  .score-high { background: #0f2e1a; color: var(--green); border: 1px solid #1a5c3a; }
+  .score-mid { background: #2e240a; color: var(--orange); border: 1px solid #5c401a; }
+  .score-low { background: #2e0f0f; color: var(--red); border: 1px solid #5c1a1a; }
+
+  /* Summary */
+  .summary { margin-top: 20px; }
+  .summary .row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .summary .stars { color: var(--yellow); font-size: 16px; letter-spacing: 2px; }
+
+  /* Progress bar */
+  .progress-bar {
+    height: 4px; background: var(--border); border-radius: 2px; margin-top: 12px;
+  }
+  .progress-bar .fill {
+    height: 100%; background: var(--green); border-radius: 2px; transition: .3s;
+  }
+
+  /* States */
+  .loading { text-align: center; padding: 40px; color: var(--dim); }
+  .spinner {
+    display: inline-block; width: 32px; height: 32px;
+    border: 3px solid var(--border); border-top-color: var(--blue);
+    border-radius: 50%; animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty { text-align: center; padding: 60px 24px; color: var(--dim); }
+  .empty .icon { font-size: 42px; margin-bottom: 12px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; top: 20px; right: 20px;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 12px 20px; border-radius: var(--radius);
+    font-size: 14px; z-index: 999;
+    animation: fadeIn .2s;
+  }
+  .toast.error { border-color: var(--red); color: var(--red); }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } }
+
+  /* Hidden sections */
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🧠 recite</h1>
+    <span class="badge">AI-powered knowledge quiz</span>
+  </div>
+  <nav>
+    <button id="nav-upload" class="active" onclick="showSection('upload')">📄 生成题库</button>
+    <button id="nav-decks" onclick="showSection('decks')">📚 题库列表</button>
+    <button id="nav-quiz" onclick="showSection('quiz')">✏️ 答题</button>
+  </nav>
+</header>
+
+<main>
+  <!-- UPLOAD SECTION -->
+  <section id="section-upload">
+    <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+      <div class="icon">📤</div>
+      <div>拖拽文档到此处，或点击上传</div>
+      <div class="hint">支持 .md / .txt / .pdf / .docx — 自动解析并调用 LLM 梳理题库</div>
+    </div>
+    <input type="file" id="fileInput" class="file-input" accept=".md,.txt,.pdf,.docx"
+           onchange="handleUpload(this.files[0])">
+    <div id="upload-status" class="hidden"></div>
+  </section>
+
+  <!-- DECKS SECTION -->
+  <section id="section-decks" class="hidden">
+    <div id="deck-list-container">
+      <div class="loading"><div class="spinner"></div><p>加载中...</p></div>
+    </div>
+  </section>
+
+  <!-- QUIZ SECTION -->
+  <section id="section-quiz" class="hidden">
+    <div id="quiz-empty" class="empty">
+      <div class="icon">📚</div>
+      <p>选择一个题库开始答题</p>
+      <div id="quiz-deck-selector" style="margin-top:16px;"></div>
+    </div>
+    <div id="quiz-active" class="hidden">
+      <div class="quiz-header">
+        <div class="question" id="quiz-question"></div>
+        <div class="meta"><span id="quiz-progress-text"></span></div>
+        <div class="progress-bar"><div class="fill" id="quiz-progress-bar" style="width:0%"></div></div>
+        <div class="keywords" id="quiz-keywords"></div>
+      </div>
+      <textarea id="quiz-answer" placeholder="输入你的答案...（支持多行）"></textarea>
+      <div class="btn-row">
+        <button class="primary" id="btn-submit" onclick="submitAnswer()">提交答案</button>
+        <button class="secondary" id="btn-skip" onclick="nextQuestion()">跳过</button>
+        <button class="secondary" id="btn-finish" onclick="finishQuiz()">结束答题</button>
+      </div>
+      <div id="eval-container"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+// ── State ──────────────────────────────────────────────────
+let currentSection = 'upload';
+let sessionId = null;
+let currentCardId = null;
+let totalCards = 0;
+let attemptedCount = 0;
+
+// ── Navigation ─────────────────────────────────────────────
+function showSection(name) {
+  currentSection = name;
+  ['upload','decks','quiz'].forEach(s => {
+    document.getElementById('section-'+s).classList.toggle('hidden', s !== name);
+    document.getElementById('nav-'+s).classList.toggle('active', s === name);
+  });
+  if (name === 'decks') loadDecks();
+  if (name === 'quiz') loadQuizStart();
+}
+
+// ── Upload ─────────────────────────────────────────────────
+const dropzone = document.getElementById('dropzone');
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleUpload(e.dataTransfer.files[0]);
+});
+
+async function handleUpload(file) {
+  if (!file) return;
+  const status = document.getElementById('upload-status');
+  status.classList.remove('hidden');
+  status.innerHTML = `<div class="loading"><div class="spinner"></div><p>正在上传并调用 LLM 梳理题目...</p><p style="font-size:12px;color:var(--dim)">大文件可能需要 1-3 分钟，请耐心等待</p></div>`;
+
+  const form = new FormData();
+  form.append('file', file);
+
+  try {
+    const res = await fetch('/api/generate', { method: 'POST', body: form });
+    const data = await res.json();
+    if (data.error) {
+      status.innerHTML = `<div class="eval-card"><span style="color:var(--red)">错误：${escapeHtml(data.error)}</span></div>`;
+      return;
+    }
+    const deck = data.deck;
+    status.innerHTML = `
+      <div class="eval-card">
+        <span style="color:var(--green);font-weight:600;">✅ 题库生成成功！</span>
+        <p style="margin-top:12px;"><strong>${escapeHtml(deck.name)}</strong> — ${deck.cards.length} 道题目</p>
+        <div style="margin-top:8px;max-height:300px;overflow-y:auto;">
+          ${deck.cards.map((c,i) => `<div style="padding:4px 0;border-bottom:1px solid var(--border);font-size:13px;">${i+1}. ${escapeHtml(c.question)}</div>`).join('')}
+        </div>
+        <button class="primary" style="margin-top:12px;" onclick="showSection('quiz');startQuiz('${deck.name}')">开始答题 →</button>
+      </div>`;
+    toast('题库生成成功！', 'success');
+  } catch(e) {
+    status.innerHTML = `<div class="eval-card"><span style="color:var(--red)">请求失败：${escapeHtml(e.message)}</span></div>`;
+  }
+}
+
+// ── Decks ──────────────────────────────────────────────────
+async function loadDecks() {
+  const container = document.getElementById('deck-list-container');
+  try {
+    const res = await fetch('/api/decks');
+    const data = await res.json();
+    if (!data.decks.length) {
+      container.innerHTML = `<div class="empty"><div class="icon">📭</div><p>暂无题库，先去上传文档生成吧</p></div>`;
+      return;
+    }
+    container.innerHTML = `<div class="deck-list">${data.decks.map(d =>
+      `<div class="deck-card" onclick="showSection('quiz');startQuiz('${d.name}')">
+        <div>
+          <div class="name">📚 ${escapeHtml(d.name)}</div>
+          <div class="meta">创建于 ${(d.created_at||'').slice(0,10)}</div>
+        </div>
+        <div class="count">${d.cards?.length||0} 题</div>
+      </div>`).join('')}</div>`;
+  } catch(e) {
+    container.innerHTML = `<div class="eval-card"><span style="color:var(--red)">加载失败</span></div>`;
+  }
+}
+
+// ── Quiz ───────────────────────────────────────────────────
+async function loadQuizStart() {
+  try {
+    const res = await fetch('/api/decks');
+    const data = await res.json();
+    const sel = document.getElementById('quiz-deck-selector');
+    if (!data.decks.length) {
+      sel.innerHTML = `<p style="color:var(--dim)">暂无题库</p>`;
+      return;
+    }
+    sel.innerHTML = `<p style="color:var(--dim);margin-bottom:12px;">选择题库：</p>
+      <div class="deck-list">${data.decks.map(d =>
+        `<div class="deck-card" onclick="startQuiz('${d.name}')">
+          <div><div class="name">${escapeHtml(d.name)}</div></div>
+          <div class="count">${d.cards?.length||0} 题</div>
+        </div>`).join('')}</div>`;
+  } catch(e) {}
+}
+
+async function startQuiz(deckName) {
+  try {
+    const res = await fetch('/api/quiz/start', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({deck_name: deckName})
+    });
+    const data = await res.json();
+    if (data.error) { toast(data.error, 'error'); return; }
+    sessionId = data.session_id;
+    totalCards = data.total;
+    attemptedCount = 0;
+    document.getElementById('quiz-empty').classList.add('hidden');
+    document.getElementById('quiz-active').classList.remove('hidden');
+    showSection('quiz');
+    nextQuestion();
+  } catch(e) { toast('启动失败: '+e.message, 'error'); }
+}
+
+async function nextQuestion() {
+  document.getElementById('eval-container').innerHTML = '';
+  document.getElementById('quiz-answer').value = '';
+  document.getElementById('btn-submit').disabled = false;
+
+  if (attemptedCount >= totalCards) {
+    finishQuiz();
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/quiz/next', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({session_id: sessionId})
+    });
+    const data = await res.json();
+    if (data.error) { toast(data.error, 'error'); return; }
+
+    currentCardId = data.card_id;
+    document.getElementById('quiz-question').textContent = data.card.question;
+    document.getElementById('quiz-progress-text').textContent =
+      `已答 ${data.attempted_count} / ${data.total} 题`;
+    document.getElementById('quiz-progress-bar').style.width =
+      (data.attempted_count / data.total * 100) + '%';
+
+    const kwDiv = document.getElementById('quiz-keywords');
+    kwDiv.innerHTML = (data.card.keywords||[]).map(k =>
+      `<span class="kw">${escapeHtml(k)}</span>`).join('');
+    kwDiv.style.display = 'flex';
+
+    document.getElementById('quiz-answer').focus();
+  } catch(e) { toast('获取题目失败: '+e.message, 'error'); }
+}
+
+async function submitAnswer() {
+  const answer = document.getElementById('quiz-answer').value.trim();
+  if (!answer) { toast('请输入你的答案再提交', 'error'); return; }
+
+  document.getElementById('btn-submit').disabled = true;
+  const evalDiv = document.getElementById('eval-container');
+  evalDiv.innerHTML = `<div class="loading"><div class="spinner"></div><p>LLM 正在评价...</p></div>`;
+
+  try {
+    const res = await fetch('/api/quiz/submit', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({session_id: sessionId, card_id: currentCardId, answer})
+    });
+    const data = await res.json();
+    attemptedCount = data.attempted_count;
+
+    // Render evaluation with Markdown-like formatting
+    const score = data.score;
+    const scoreClass = score >= 4 ? 'score-high' : score >= 2 ? 'score-mid' : 'score-low';
+    const stars = '★'.repeat(Math.max(0,score)) + '☆'.repeat(Math.max(0,5-score));
+
+    evalDiv.innerHTML = `
+      <div class="eval-card">
+        <div class="score-badge ${scoreClass}">${stars} ${score}/5</div>
+        <div style="margin-top:16px;">${formatMarkdown(data.evaluation)}</div>
+      </div>
+      <div class="btn-row" style="margin-top:16px;">
+        <button class="primary" onclick="nextQuestion()">下一题 →</button>
+        <button class="secondary" onclick="finishQuiz()">结束答题</button>
+      </div>`;
+
+    document.getElementById('quiz-progress-text').textContent =
+      `已答 ${attemptedCount} / ${totalCards} 题`;
+    document.getElementById('quiz-progress-bar').style.width =
+      (attemptedCount / totalCards * 100) + '%';
+
+  } catch(e) { evalDiv.innerHTML = `<span style="color:var(--red)">评价失败: ${escapeHtml(e.message)}</span>`; }
+}
+
+async function finishQuiz() {
+  document.getElementById('btn-submit').disabled = true;
+
+  try {
+    const res = await fetch('/api/quiz/summary', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({session_id: sessionId})
+    });
+    const data = await res.json();
+
+    const evalDiv = document.getElementById('eval-container');
+    evalDiv.innerHTML = `<div class="eval-card">
+      <h3>📊 答题总结</h3>
+      <p style="font-size:20px;margin:12px 0;">平均分: <strong>${data.average}/5</strong>  |  共答 ${data.total_answered}/${data.total_cards} 题</p>
+      <div class="summary">
+        ${data.history.map(h => {
+          const s = h.score||0;
+          const stars = '★'.repeat(Math.max(0,s)) + '☆'.repeat(Math.max(0,5-s));
+          return `<div class="row"><span>${escapeHtml(h.question)}</span><span class="stars">${stars}</span></div>`;
+        }).join('')}
+      </div>
+      <div class="btn-row" style="margin-top:16px;">
+        <button class="secondary" onclick="showSection('decks');loadDecks()">返回题库</button>
+      </div>
+    </div>`;
+
+    document.getElementById('quiz-progress-bar').style.width = '100%';
+    document.getElementById('quiz-progress-text').textContent = `完成！${data.total_answered} 题`;
+    sessionId = null;
+  } catch(e) { toast('获取总结失败: '+e.message, 'error'); }
+}
+
+// ── Utilities ──────────────────────────────────────────────
+function formatMarkdown(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/### (.+)/g, '<h3>$1</h3>')
+    .replace(/## (.+)/g, '<h3>$1</h3>')
+    .replace(/^- (.+)/gm, '<li>$1</li>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+    .replace(/<\/li>\n<li>/g, '</li><li>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+function toast(msg, type) {
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type||'');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// Keyboard shortcut: Cmd/Ctrl+Enter to submit
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    if (currentSection === 'quiz' && !document.getElementById('quiz-active').classList.contains('hidden')) {
+      submitAnswer();
+    }
+  }
+});
+</script>
+</body>
+</html>
