@@ -10,13 +10,13 @@ def get_client():
     )
 
 
-def chat(messages, temperature=0.7):
+def chat(messages, temperature=0.7, max_tokens=None):
     cfg = load_config()
     client = get_client()
     response = client.chat.completions.create(
         model=cfg["llm"]["model"],
         messages=messages,
         temperature=temperature,
-        max_tokens=cfg["llm"]["max_tokens"],
+        max_tokens=max_tokens or cfg["llm"]["max_tokens"],
     )
     return response.choices[0].message.content
