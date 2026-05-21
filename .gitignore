@@ -6,4 +6,6 @@ venv/
 .env
 cards/
 小红书发布文案.md
+screenshot_*.png
+generate_screenshots.py
 .DS_Store
