@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,12 +7,23 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 <style>
-  :root {
+  /* ── Theme: Dark (default) ──────────────────── */
+  :root, [data-theme="dark"] {
     --bg: #0d1117; --surface: #161b22; --border: #30363d;
     --text: #c9d1d9; --dim: #8b949e; --green: #7ee787;
     --red: #f85149; --yellow: #d2a563; --blue: #79c0ff; --orange: #ffa657;
-    --radius: 8px;
+    --btn-bg: #1c2333; --input-bg: #0d1117; --shadow: rgba(0,0,0,.6);
+    --banner-bg: linear-gradient(135deg, #1a2332 0%, #1a1a2e 100%);
   }
+  /* ── Theme: Light ───────────────────────────── */
+  [data-theme="light"] {
+    --bg: #ffffff; --surface: #f6f8fa; --border: #d0d7de;
+    --text: #1f2328; --dim: #656d76; --green: #1a7f37;
+    --red: #cf222e; --yellow: #9a6700; --blue: #0969da; --orange: #bc4c00;
+    --btn-bg: #eaeef2; --input-bg: #ffffff; --shadow: rgba(0,0,0,.15);
+    --banner-bg: linear-gradient(135deg, #ddf4ff 0%, #fff8e8 100%);
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -20,70 +31,73 @@
     display: flex; flex-direction: column;
   }
 
-  /* ── Header ───────────────────────────────── */
+  /* ── Header ─────────────────────────────────── */
   header {
     background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 8px;
+    padding: 10px 24px; display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 6px;
   }
-  header .brand { display: flex; align-items: center; gap: 10px; }
+  header .brand { display: flex; align-items: center; gap: 8px; }
   header h1 { font-size: 19px; font-weight: 600; }
   header .badge { font-size: 11px; color: var(--dim); }
-  header .right { display: flex; align-items: center; gap: 10px; }
-  nav { display: flex; gap: 5px; }
+  header .right { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  nav { display: flex; gap: 4px; }
   nav button {
     background: var(--surface); border: 1px solid var(--border); color: var(--text);
-    padding: 7px 14px; border-radius: var(--radius); cursor: pointer; font-size: 13px; transition: .15s;
+    padding: 6px 12px; border-radius: var(--radius); cursor: pointer; font-size: 13px; transition: .15s;
   }
-  nav button:hover { background: #1c2333; }
+  nav button:hover { background: var(--btn-bg); }
   nav button.active { border-color: var(--blue); color: var(--blue); }
 
-  /* Config button in header */
+  .icon-btn {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 6px 11px; border-radius: var(--radius); cursor: pointer; font-size: 15px; transition: .15s;
+    line-height: 1;
+  }
+  .icon-btn:hover { background: var(--btn-bg); }
   .config-btn {
-    background: #1a2332; border: 1px solid var(--yellow); color: var(--yellow);
-    padding: 7px 14px; border-radius: var(--radius); cursor: pointer; font-size: 13px;
+    background: var(--btn-bg); border: 1px solid var(--yellow); color: var(--yellow);
+    padding: 6px 12px; border-radius: var(--radius); cursor: pointer; font-size: 12px;
     font-weight: 600; transition: .15s; white-space: nowrap;
   }
-  .config-btn:hover { background: #2a3322; }
-  .config-btn.configured { border-color: var(--green); color: var(--green); background: #0f2e1a; }
+  .config-btn:hover { background: var(--surface); }
+  .config-btn.configured { border-color: var(--green); color: var(--green); }
 
   main { flex: 1; max-width: 900px; width: 100%; margin: 24px auto; padding: 0 24px; }
 
-  /* ── API Setup Banner (onboarding) ────────── */
+  /* ── Setup Banner ───────────────────────────── */
   .setup-banner {
-    background: linear-gradient(135deg, #1a2332 0%, #1a1a2e 100%);
-    border: 1px solid var(--yellow); border-radius: 12px; padding: 24px 28px;
-    margin-bottom: 24px;
+    background: var(--banner-bg); border: 1px solid var(--yellow); border-radius: 12px;
+    padding: 24px 28px; margin-bottom: 20px;
   }
-  .setup-banner h2 { font-size: 18px; margin-bottom: 6px; }
-  .setup-banner p { color: var(--dim); font-size: 13px; margin-bottom: 14px; line-height: 1.6; }
+  .setup-banner h2 { font-size: 18px; margin-bottom: 6px; color: var(--text); }
+  .setup-banner p { color: var(--dim); font-size: 13px; margin-bottom: 12px; line-height: 1.6; }
   .setup-banner .fields { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
-  .setup-banner .fields .full { grid-column: 1 / -1; }
   .setup-banner label { display: block; font-size: 12px; color: var(--dim); margin-bottom: 3px; }
-  .setup-banner input, .setup-banner select {
-    width: 100%; background: var(--bg); border: 1px solid var(--border);
+  .setup-banner input {
+    width: 100%; background: var(--input-bg); border: 1px solid var(--border);
     color: var(--text); padding: 9px 11px; border-radius: var(--radius);
     font-size: 13px; font-family: monospace;
   }
   .setup-banner input:focus { outline: none; border-color: var(--blue); }
-  .setup-banner .preset-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .setup-banner .preset-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; align-items: center; }
   .setup-banner .preset {
-    background: var(--bg); border: 1px solid var(--border); color: var(--dim);
+    background: var(--input-bg); border: 1px solid var(--border); color: var(--dim);
     padding: 4px 10px; border-radius: 14px; font-size: 11px; cursor: pointer; transition: .15s;
   }
   .setup-banner .preset:hover { border-color: var(--blue); color: var(--blue); }
 
-  /* ── Dropzone ─────────────────────────────── */
+  /* ── Dropzone ───────────────────────────────── */
   .dropzone {
-    border: 2px dashed var(--border); border-radius: var(--radius); padding: 44px 24px;
-    text-align: center; cursor: pointer; transition: .2s; margin-bottom: 16px;
+    border: 2px dashed var(--border); border-radius: var(--radius); padding: 40px 24px;
+    text-align: center; cursor: pointer; transition: .2s; margin-bottom: 14px;
   }
-  .dropzone:hover, .dropzone.dragover { border-color: var(--blue); background: #0d1b2b; }
+  .dropzone:hover, .dropzone.dragover { border-color: var(--blue); background: var(--btn-bg); }
   .dropzone .icon { font-size: 40px; margin-bottom: 8px; }
   .dropzone .hint { color: var(--dim); font-size: 12px; margin-top: 6px; }
   .file-input { display: none; }
 
-  /* ── Deck list ────────────────────────────── */
+  /* ── Deck list ──────────────────────────────── */
   .deck-list { display: grid; gap: 10px; }
   .deck-card {
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
@@ -96,30 +110,30 @@
   .deck-card .count { color: var(--blue); font-size: 13px; white-space: nowrap; }
   .deck-card .del-btn {
     background: none; border: 1px solid var(--border); color: var(--dim);
-    font-size: 12px; cursor: pointer; border-radius: 4px; padding: 3px 8px; margin-left: 8px;
+    font-size: 12px; cursor: pointer; border-radius: 4px; padding: 3px 8px; margin-left: 6px;
   }
   .deck-card .del-btn:hover { color: var(--red); border-color: var(--red); }
 
-  /* ── Quiz ─────────────────────────────────── */
+  /* ── Quiz ───────────────────────────────────── */
   .quiz-header {
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 18px 22px; margin-bottom: 16px;
+    padding: 18px 22px; margin-bottom: 14px;
   }
   .quiz-header .question { font-size: 17px; font-weight: 600; line-height: 1.6; }
   .quiz-header .meta { color: var(--dim); font-size: 12px; margin-top: 6px; }
   .quiz-header .keywords { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
   .quiz-header .kw {
-    font-size: 11px; background: #1a2332; color: var(--blue);
-    padding: 2px 9px; border-radius: 10px; border: 1px solid #1f3a5f;
+    font-size: 11px; background: var(--btn-bg); color: var(--blue);
+    padding: 2px 9px; border-radius: 10px; border: 1px solid var(--border);
   }
   textarea {
-    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    width: 100%; background: var(--input-bg); border: 1px solid var(--border);
     border-radius: var(--radius); color: var(--text); padding: 14px;
     font-size: 14px; line-height: 1.7; resize: vertical; min-height: 140px; font-family: inherit;
   }
   textarea:focus { outline: none; border-color: var(--blue); }
 
-  /* ── Buttons ──────────────────────────────── */
+  /* ── Buttons ────────────────────────────────── */
   .btn-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
   button.primary {
     background: #238636; border: none; color: #fff; padding: 9px 22px;
@@ -130,13 +144,13 @@
     background: var(--surface); border: 1px solid var(--border); color: var(--text);
     padding: 9px 22px; border-radius: var(--radius); font-size: 14px; cursor: pointer;
   }
-  button.secondary:hover { background: #1c2333; }
+  button.secondary:hover { background: var(--btn-bg); }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* ── Evaluation ───────────────────────────── */
+  /* ── Evaluation ─────────────────────────────── */
   .eval-card {
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 22px; margin-top: 18px; line-height: 1.8; font-size: 14px;
+    padding: 22px; margin-top: 16px; line-height: 1.8; font-size: 14px;
   }
   .eval-card h3 { margin: 14px 0 6px; font-size: 15px; }
   .eval-card ul { padding-left: 18px; }
@@ -145,23 +159,26 @@
   .score-high { background: #0f2e1a; color: var(--green); border: 1px solid #1a5c3a; }
   .score-mid { background: #2e240a; color: var(--orange); border: 1px solid #5c401a; }
   .score-low { background: #2e0f0f; color: var(--red); border: 1px solid #5c1a1a; }
+  [data-theme="light"] .score-high { background: #dafbe1; }
+  [data-theme="light"] .score-mid { background: #fff8e8; }
+  [data-theme="light"] .score-low { background: #ffebe9; }
 
-  /* ── Summary ──────────────────────────────── */
+  /* ── Summary ────────────────────────────────── */
   .summary .row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
   .summary .stars { color: var(--yellow); font-size: 15px; letter-spacing: 2px; }
 
-  /* ── Progress ─────────────────────────────── */
+  /* ── Progress ───────────────────────────────── */
   .progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 10px; }
   .progress-bar .fill { height: 100%; background: var(--green); border-radius: 2px; transition: .3s; }
 
-  /* ── States ───────────────────────────────── */
+  /* ── States ─────────────────────────────────── */
   .loading { text-align: center; padding: 36px; color: var(--dim); }
   .spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .8s linear infinite; margin-bottom: 10px; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .empty { text-align: center; padding: 60px 24px; color: var(--dim); }
   .empty .icon { font-size: 40px; margin-bottom: 10px; }
 
-  /* ── Toast ────────────────────────────────── */
+  /* ── Toast ──────────────────────────────────── */
   .toast { position: fixed; top: 16px; right: 16px; background: var(--surface); border: 1px solid var(--border); padding: 10px 18px; border-radius: var(--radius); font-size: 13px; z-index: 999; animation: toastIn .2s; max-width: 350px; }
   .toast.error { border-color: var(--red); color: var(--red); }
   .toast.success { border-color: var(--green); color: var(--green); }
@@ -169,7 +186,33 @@
 
   .hidden { display: none !important; }
 
-  /* ── Debug output ─────────────────────────── */
+  /* ── Modal ──────────────────────────────────── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: var(--shadow);
+    display: flex; align-items: center; justify-content: center; z-index: 1000;
+  }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 26px; width: 450px; max-width: 90vw;
+  }
+  .modal h2 { font-size: 17px; margin-bottom: 14px; color: var(--text); }
+  .modal label { display: block; font-size: 12px; color: var(--dim); margin: 10px 0 3px; }
+  .modal input {
+    width: 100%; background: var(--input-bg); border: 1px solid var(--border);
+    color: var(--text); padding: 9px 11px; border-radius: var(--radius); font-size: 13px; font-family: monospace;
+  }
+  .modal input:focus { outline: none; border-color: var(--blue); }
+  .modal .hint { font-size: 11px; color: var(--dim); margin-top: 3px; }
+  .modal .btn-row { justify-content: flex-end; }
+
+  /* ── Guide modal ────────────────────────────── */
+  .guide-body { font-size: 13px; line-height: 1.9; color: var(--text); }
+  .guide-body h3 { color: var(--yellow); margin: 16px 0 8px; }
+  .guide-body ul { padding-left: 18px; margin: 6px 0; }
+  .guide-body a { color: var(--blue); }
+  .guide-body .tip { color: var(--orange); font-size: 12px; }
+
+  /* ── Debug ──────────────────────────────────── */
   .debug-box {
     background: #0a0a0a; border: 1px solid var(--border); border-radius: var(--radius);
     padding: 12px 16px; margin-top: 10px; font-size: 11px; font-family: monospace;
@@ -181,86 +224,27 @@
 <body>
 
 <header>
-  <div class="brand">
-    <h1>🧠 ShouldPass</h1>
-    <span class="badge">AI 背诵教官 · 纯浏览器运行</span>
-  </div>
+  <div class="brand"><h1>🧠 ShouldPass</h1><span class="badge" data-i18n="badge">AI 背诵教官 · 纯浏览器运行</span></div>
   <div class="right">
     <nav>
-      <button id="nav-upload" class="active" onclick="showTab('upload')">📄 生成题库</button>
-      <button id="nav-decks" onclick="showTab('decks')">📚 题库列表</button>
-      <button id="nav-quiz" onclick="showTab('quiz')">✏️ 答题</button>
+      <button id="nav-upload" class="active" onclick="showTab('upload')" data-i18n="nav_generate">📄 生成题库</button>
+      <button id="nav-decks" onclick="showTab('decks')" data-i18n="nav_decks">📚 题库列表</button>
+      <button id="nav-quiz" onclick="showTab('quiz')" data-i18n="nav_quiz">✏️ 答题</button>
     </nav>
-    <button class="config-btn" id="config-btn" onclick="openSettings()">⚡ 配置API</button>
-    <button class="secondary" onclick="openGuide()" style="font-size:13px;padding:7px 14px;">📖 使用指南</button>
+    <button class="config-btn" id="config-btn" onclick="openSettings()">⚡ <span data-i18n="config_btn">配置API</span></button>
+    <button class="secondary" onclick="openGuide()" style="font-size:12px;padding:6px 11px;" data-i18n="guide_btn">📖 使用指南</button>
+    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="切换昼夜模式">🌙</button>
+    <button class="icon-btn" id="lang-btn" onclick="toggleLang()" title="Switch Language">🌐</button>
   </div>
 </header>
 
 <!-- Guide modal -->
 <div class="modal-overlay hidden" id="guide-modal">
-  <div class="modal" style="width:600px;max-height:80vh;overflow-y:auto;">
-    <h2>📖 ShouldPass 使用指南</h2>
-    <div style="font-size:13px;line-height:1.9;color:var(--text);">
-
-      <h3 style="color:var(--yellow);margin:16px 0 8px;">第一步：获取 API Key</h3>
-      <p>ShouldPass 需要调用大模型来梳理题目和批改答案。你需要一个 LLM 的 API Key：</p>
-      <ul style="padding-left:18px;margin:8px 0;">
-        <li><strong>DeepSeek（推荐，便宜）</strong>：<br>
-          打开 <a href="https://platform.deepseek.com/api_keys" target="_blank" style="color:var(--blue);">https://platform.deepseek.com/api_keys</a><br>
-          注册/登录 → 点击「创建 API Key」→ 复制保存<br>
-          <span style="color:var(--dim);font-size:11px;">Base URL: https://api.deepseek.com | Model: deepseek-chat</span>
-        </li>
-        <li style="margin-top:8px;"><strong>OpenAI</strong>：<br>
-          打开 <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--blue);">https://platform.openai.com/api-keys</a><br>
-          创建 API Key → 复制保存<br>
-          <span style="color:var(--dim);font-size:11px;">Base URL: https://api.openai.com/v1 | Model: gpt-4o</span>
-        </li>
-        <li style="margin-top:8px;"><strong>其他兼容接口</strong>（Ollama / Groq / 硅基流动 等）：<br>
-          只要支持 OpenAI 兼容的 /chat/completions 端点即可<br>
-          <span style="color:var(--dim);font-size:11px;">填入对应的 Base URL + Model 就行</span>
-        </li>
-      </ul>
-      <p style="color:var(--orange);font-size:12px;">⚠️ API Key 只保存在你的浏览器本地，不会上传到任何服务器。</p>
-
-      <h3 style="color:var(--yellow);margin:18px 0 8px;">第二步：配置 ShouldPass</h3>
-      <p>点击右上角 <strong>「⚡ 配置API」</strong> 按钮，填入：</p>
-      <ul style="padding-left:18px;margin:8px 0;">
-        <li><strong>API Key</strong>：上一步获取的 key（sk- 开头）</li>
-        <li><strong>Base URL</strong>：API 地址（默认已填好 DeepSeek）</li>
-        <li><strong>Model</strong>：模型名称</li>
-        <li>点击「保存配置」</li>
-      </ul>
-      <p style="color:var(--dim);font-size:11px;">首次访问时，上传区会自动显示配置面板，直接在那里填也可以。</p>
-
-      <h3 style="color:var(--yellow);margin:18px 0 8px;">第三步：上传文档生成题库</h3>
-      <p>在「📄 生成题库」页面，拖拽或点击上传你的学习文档：</p>
-      <ul style="padding-left:18px;margin:8px 0;">
-        <li>支持 <strong>.md / .txt / .pdf / .docx</strong> 格式</li>
-        <li>文档里应有题目 + 参考答案（格式不限，LLM 会自动梳理）</li>
-        <li>上传后 LLM 自动提取题目、润色答案、生成关键词</li>
-        <li>大文档（3万+ 字）会自动分片处理，耐心等待即可</li>
-      </ul>
-
-      <h3 style="color:var(--yellow);margin:18px 0 8px;">第四步：开始答题</h3>
-      <p>题库生成后，点击「开始答题」或切换到「✏️ 答题」标签：</p>
-      <ul style="padding-left:18px;margin:8px 0;">
-        <li>随机出题，你在文本框里作答（支持多行）</li>
-        <li><strong>Cmd/Ctrl + Enter</strong> 提交答案</li>
-        <li>LLM 逐关键词对照参考答案，给出 1-5 分评价</li>
-        <li>指出你答对的部分、遗漏的关键点、错误的地方</li>
-        <li>答题记录保存在浏览器本地，下次打开还在</li>
-      </ul>
-
-      <h3 style="color:var(--yellow);margin:18px 0 8px;">小技巧</h3>
-      <ul style="padding-left:18px;margin:8px 0;">
-        <li>源文档写得越详细，批改越精准</li>
-        <li>得分低的题目会被优先重复出题</li>
-        <li>题库和记录都存在浏览器本地，清除缓存会丢失</li>
-        <li>换设备需要重新上传文档（或导出/导入题库）</li>
-      </ul>
-    </div>
+  <div class="modal" style="width:620px;max-height:80vh;overflow-y:auto;">
+    <h2 data-i18n="guide_title">📖 ShouldPass 使用指南</h2>
+    <div class="guide-body" id="guide-content"></div>
     <div class="btn-row" style="justify-content:flex-end;margin-top:18px;">
-      <button class="primary" onclick="closeGuide()">我知道了</button>
+      <button class="primary" onclick="closeGuide()" data-i18n="guide_ok">我知道了</button>
     </div>
   </div>
 </div>
@@ -268,28 +252,26 @@
 <!-- Settings modal -->
 <div class="modal-overlay hidden" id="settings-modal">
   <div class="modal">
-    <h2>⚡ 配置 LLM API</h2>
-    <p style="color:var(--dim);font-size:12px;margin-bottom:12px;line-height:1.6;">
-      你的 API Key 只存在浏览器本地（localStorage），<strong>不会上传到任何服务器</strong>。<br>
-      所有 LLM 请求直接从你的浏览器发出。
+    <h2 data-i18n="settings_title">⚡ 配置 LLM API</h2>
+    <p style="color:var(--dim);font-size:12px;margin-bottom:12px;line-height:1.6;" data-i18n="settings_privacy">
+      你的 API Key 只存在浏览器本地（localStorage），<strong>不会上传到任何服务器</strong>。<br>所有 LLM 请求直接从你的浏览器发出。
     </p>
-    <label>API Key</label>
+    <label data-i18n="label_apikey">API Key</label>
     <input type="password" id="cfg-api-key" placeholder="sk-xxxxxxxx" autocomplete="off">
-    <label>Base URL</label>
+    <label data-i18n="label_baseurl">Base URL</label>
     <input type="text" id="cfg-base-url" placeholder="https://api.deepseek.com">
-    <div class="hint" style="font-size:11px;color:var(--dim);margin-top:3px;">
-      常用：<code style="color:var(--blue);cursor:pointer" onclick="document.getElementById('cfg-base-url').value='https://api.deepseek.com'">DeepSeek</code> ·
-      <code style="color:var(--blue);cursor:pointer" onclick="document.getElementById('cfg-base-url').value='https://api.openai.com/v1'">OpenAI</code> ·
-      或其他 OpenAI 兼容接口
+    <div class="hint"><span data-i18n="settings_url_hint">常用：</span>
+      <code style="color:var(--blue);cursor:pointer" onclick="document.getElementById('cfg-base-url').value='https://api.deepseek.com'">DeepSeek</code> ·
+      <code style="color:var(--blue);cursor:pointer" onclick="document.getElementById('cfg-base-url').value='https://api.openai.com/v1'">OpenAI</code>
     </div>
-    <label>Model</label>
+    <label data-i18n="label_model">Model</label>
     <input type="text" id="cfg-model" placeholder="deepseek-chat">
-    <div class="hint" style="font-size:11px;color:var(--dim);margin-top:3px;">如 deepseek-chat / gpt-4o / qwen-plus 等</div>
-    <label>Max Tokens</label>
+    <div class="hint" data-i18n="settings_model_hint">如 deepseek-chat / gpt-4o / qwen-plus 等</div>
+    <label data-i18n="label_maxtokens">Max Tokens</label>
     <input type="number" id="cfg-max-tokens" placeholder="16384" value="16384">
     <div class="btn-row" style="margin-top:18px;justify-content:flex-end;">
-      <button class="secondary" onclick="closeSettings()">取消</button>
-      <button class="primary" onclick="saveSettings()">保存配置</button>
+      <button class="secondary" onclick="closeSettings()" data-i18n="cancel">取消</button>
+      <button class="primary" onclick="saveSettings()" data-i18n="save">保存配置</button>
     </div>
   </div>
 </div>
@@ -297,44 +279,27 @@
 <main>
   <!-- UPLOAD TAB -->
   <section id="tab-upload">
-    <!-- Onboarding: shown when no API key configured -->
     <div class="setup-banner hidden" id="setup-banner">
-      <h2>👋 欢迎！请先配置 LLM API</h2>
-      <p>ShouldPass 需要调用大模型来梳理题目和评价答案。请输入你的 API Key——不会上传，只存在你浏览器里。<br><a href="javascript:openGuide()" style="color:var(--blue);font-size:12px;">📖 不知道怎么获取 API Key？查看使用指南 →</a></p>
+      <h2 data-i18n="banner_title">👋 欢迎！请先配置 LLM API</h2>
+      <p data-i18n="banner_desc">ShouldPass 需要调用大模型来梳理题目和评价答案。请输入你的 API Key——不会上传，只存在你浏览器里。<br><a href="javascript:openGuide()" style="color:var(--blue);font-size:12px;">📖 不知道怎么获取 API Key？查看使用指南 →</a></p>
       <div class="fields">
-        <div>
-          <label>API Key</label>
-          <input type="password" id="banner-api-key" placeholder="sk-xxxxxxxx" autocomplete="off">
-        </div>
-        <div>
-          <label>Base URL</label>
-          <input type="text" id="banner-base-url" placeholder="https://api.deepseek.com">
-        </div>
-        <div>
-          <label>Model</label>
-          <input type="text" id="banner-model" placeholder="deepseek-chat">
-        </div>
-        <div>
-          <label>Max Tokens</label>
-          <input type="number" id="banner-max-tokens" placeholder="16384" value="16384">
-        </div>
+        <div><label data-i18n="label_apikey">API Key</label><input type="password" id="banner-api-key" placeholder="sk-xxxxxxxx" autocomplete="off"></div>
+        <div><label data-i18n="label_baseurl">Base URL</label><input type="text" id="banner-base-url" placeholder="https://api.deepseek.com"></div>
+        <div><label data-i18n="label_model">Model</label><input type="text" id="banner-model" placeholder="deepseek-chat"></div>
+        <div><label data-i18n="label_maxtokens">Max Tokens</label><input type="number" id="banner-max-tokens" placeholder="16384" value="16384"></div>
       </div>
       <div class="preset-row">
-        <span style="font-size:11px;color:var(--dim);">快速填入：</span>
+        <span style="font-size:11px;color:var(--dim);" data-i18n="quick_fill">快速填入：</span>
         <button class="preset" onclick="fillPreset('deepseek')">🔵 DeepSeek</button>
         <button class="preset" onclick="fillPreset('openai')">🟢 OpenAI</button>
       </div>
-      <div class="btn-row">
-        <button class="primary" onclick="saveBannerSettings()">保存并开始使用 →</button>
-      </div>
+      <div class="btn-row"><button class="primary" onclick="saveBannerSettings()" data-i18n="banner_save">保存并开始使用 →</button></div>
     </div>
-
-    <!-- Ready state: shown when API is configured -->
     <div id="upload-ready">
       <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
         <div class="icon">📤</div>
-        <div>拖拽文档到此处，或点击上传</div>
-        <div class="hint">支持 .md / .txt / .pdf / .docx — LLM 自动梳理成结构化题库</div>
+        <div data-i18n="dropzone_text">拖拽文档到此处，或点击上传</div>
+        <div class="hint" data-i18n="dropzone_hint">支持 .md / .txt / .pdf / .docx — LLM 自动梳理成结构化题库</div>
       </div>
       <input type="file" id="fileInput" class="file-input" accept=".md,.txt,.pdf,.docx" onchange="handleUpload(this.files[0])">
     </div>
@@ -342,15 +307,13 @@
   </section>
 
   <!-- DECKS TAB -->
-  <section id="tab-decks" class="hidden">
-    <div id="deck-list-container"></div>
-  </section>
+  <section id="tab-decks" class="hidden"><div id="deck-list-container"></div></section>
 
   <!-- QUIZ TAB -->
   <section id="tab-quiz" class="hidden">
     <div id="quiz-empty" class="empty">
       <div class="icon">📚</div>
-      <p>选择一个题库开始答题</p>
+      <p data-i18n="quiz_select">选择一个题库开始答题</p>
       <div id="quiz-deck-selector" style="margin-top:14px;"></div>
     </div>
     <div id="quiz-active" class="hidden">
@@ -360,11 +323,11 @@
         <div class="progress-bar"><div class="fill" id="quiz-progress-bar" style="width:0%"></div></div>
         <div class="keywords" id="quiz-keywords"></div>
       </div>
-      <textarea id="quiz-answer" placeholder="输入你的答案...（多行文本，Cmd/Ctrl + Enter 提交）"></textarea>
+      <textarea id="quiz-answer" data-i18n-placeholder="quiz_placeholder" placeholder="输入你的答案...（多行文本，Cmd/Ctrl + Enter 提交）"></textarea>
       <div class="btn-row">
-        <button class="primary" id="btn-submit" onclick="submitAnswer()">✅ 提交答案</button>
-        <button class="secondary" id="btn-skip" onclick="nextQuestion()">⏭ 跳过</button>
-        <button class="secondary" id="btn-finish" onclick="finishQuiz()">📊 结束答题</button>
+        <button class="primary" id="btn-submit" onclick="submitAnswer()" data-i18n="quiz_submit">✅ 提交答案</button>
+        <button class="secondary" id="btn-skip" onclick="nextQuestion()" data-i18n="quiz_skip">⏭ 跳过</button>
+        <button class="secondary" id="btn-finish" onclick="finishQuiz()" data-i18n="quiz_finish">📊 结束答题</button>
       </div>
       <div id="eval-container"></div>
     </div>
@@ -372,6 +335,244 @@
 </main>
 
 <script>
+// ═══════════════════════════════════════════════════════════
+// i18n
+// ═══════════════════════════════════════════════════════════
+const I18N = {
+  zh: {
+    badge: 'AI 背诵教官 · 纯浏览器运行',
+    nav_generate: '📄 生成题库', nav_decks: '📚 题库列表', nav_quiz: '✏️ 答题',
+    config_btn: '配置API', guide_btn: '📖 使用指南',
+    guide_title: '📖 ShouldPass 使用指南', guide_ok: '我知道了',
+    settings_title: '⚡ 配置 LLM API',
+    settings_privacy: '你的 API Key 只存在浏览器本地（localStorage），<strong>不会上传到任何服务器</strong>。<br>所有 LLM 请求直接从你的浏览器发出。',
+    label_apikey: 'API Key', label_baseurl: 'Base URL', label_model: 'Model', label_maxtokens: 'Max Tokens',
+    settings_url_hint: '常用：',
+    settings_model_hint: '如 deepseek-chat / gpt-4o / qwen-plus 等',
+    cancel: '取消', save: '保存配置',
+    banner_title: '👋 欢迎！请先配置 LLM API',
+    banner_desc: 'ShouldPass 需要调用大模型来梳理题目和评价答案。请输入你的 API Key——不会上传，只存在你浏览器里。<br><a href="javascript:openGuide()" style="color:var(--blue);font-size:12px;">📖 不知道怎么获取 API Key？查看使用指南 →</a>',
+    quick_fill: '快速填入：',
+    banner_save: '保存并开始使用 →',
+    dropzone_text: '拖拽文档到此处，或点击上传',
+    dropzone_hint: '支持 .md / .txt / .pdf / .docx — LLM 自动梳理成结构化题库',
+    quiz_select: '选择一个题库开始答题',
+    quiz_placeholder: '输入你的答案...（多行文本，Cmd/Ctrl + Enter 提交）',
+    quiz_submit: '✅ 提交答案', quiz_skip: '⏭ 跳过', quiz_finish: '📊 结束答题',
+    toast_apikey_first: '请先配置 API Key',
+    toast_deck_empty: '题库为空',
+    toast_answer_empty: '请输入你的答案再提交',
+    toast_config_saved: '配置已保存',
+    toast_banner_saved: 'API 配置已保存！现在可以上传文档了',
+    toast_deck_saved: '题库生成成功！',
+    toast_deck_deleted: '已删除',
+    parsing_doc: '正在解析文档...',
+    parsing_done: '文档已解析',
+    calling_llm: '正在调用 LLM 梳理题目... 大文件可能需要 1-3 分钟',
+    chunk_split: '文档已分为 {total} 个片段，逐段调用 LLM 处理...',
+    chunk_proc: '处理片段 {idx}/{total}：「{preview}」...',
+    chunk_done: '片段 {idx}/{total} 完成 → 提取 {count} 题',
+    gen_empty: '⚠️ LLM 未返回有效题目',
+    gen_empty_hint: '可能原因：文档格式问题、API 返回异常、或 JSON 解析失败',
+    gen_empty_f12: '请打开浏览器控制台（F12）查看详细日志，或尝试换一个文档',
+    gen_success: '✅ 题库生成成功！',
+    gen_error_hint: '请检查 API 配置是否正确（Base URL、API Key、Model）',
+    eval_loading: 'LLM 正在评价你的回答...',
+    eval_fail: '评价失败: ',
+    summary_title: '📊 答题总结',
+    summary_score: '平均分',
+    summary_total: '共答',
+    summary_questions: '题',
+    summary_back: '返回题库列表',
+    quiz_complete: '完成！',
+    no_decks: '暂无题库',
+    no_decks_hint: '去「📄 生成题库」上传文档开始吧',
+    no_decks_quiz: '暂无题库，先去「📄 生成题库」上传文档',
+    select_deck: '选择题库开始答题：',
+    configured: '已配置: {model}',
+    not_configured: '配置API',
+    // Guide content
+    guide_step1_title: '第一步：获取 API Key',
+    guide_step1_p: 'ShouldPass 需要调用大模型来梳理题目和批改答案。你需要一个 LLM 的 API Key：',
+    guide_ds: 'DeepSeek（推荐，便宜）',
+    guide_ds_url: '打开 https://platform.deepseek.com/api_keys',
+    guide_ds_steps: '注册/登录 → 点击「创建 API Key」→ 复制保存',
+    guide_ds_info: 'Base URL: https://api.deepseek.com | Model: deepseek-chat',
+    guide_openai: 'OpenAI',
+    guide_openai_url: '打开 https://platform.openai.com/api-keys',
+    guide_openai_steps: '创建 API Key → 复制保存',
+    guide_openai_info: 'Base URL: https://api.openai.com/v1 | Model: gpt-4o',
+    guide_other: '其他兼容接口（Ollama / Groq / 硅基流动 等）',
+    guide_other_desc: '只要支持 OpenAI 兼容的 /chat/completions 端点即可',
+    guide_other_info: '填入对应的 Base URL + Model 就行',
+    guide_privacy: '⚠️ API Key 只保存在你的浏览器本地，不会上传到任何服务器。',
+    guide_step2_title: '第二步：配置 ShouldPass',
+    guide_step2_p: '点击右上角「⚡ 配置API」按钮，填入：',
+    guide_step2_1: 'API Key：上一步获取的 key（sk- 开头）',
+    guide_step2_2: 'Base URL：API 地址（默认已填好 DeepSeek）',
+    guide_step2_3: 'Model：模型名称',
+    guide_step2_4: '点击「保存配置」',
+    guide_step2_note: '首次访问时，上传区会自动显示配置面板，直接在那里填也可以。',
+    guide_step3_title: '第三步：上传文档生成题库',
+    guide_step3_p: '在「📄 生成题库」页面，拖拽或点击上传你的学习文档：',
+    guide_step3_1: '支持 .md / .txt / .pdf / .docx 格式',
+    guide_step3_2: '文档里应有题目 + 参考答案（格式不限，LLM 会自动梳理）',
+    guide_step3_3: '上传后 LLM 自动提取题目、润色答案、生成关键词',
+    guide_step3_4: '大文档（3万+ 字）会自动分片处理，耐心等待即可',
+    guide_step4_title: '第四步：开始答题',
+    guide_step4_p: '题库生成后，点击「开始答题」或切换到「✏️ 答题」标签：',
+    guide_step4_1: '随机出题，你在文本框里作答（支持多行）',
+    guide_step4_2: 'Cmd/Ctrl + Enter 提交答案',
+    guide_step4_3: 'LLM 逐关键词对照参考答案，给出 1-5 分评价',
+    guide_step4_4: '指出你答对的部分、遗漏的关键点、错误的地方',
+    guide_step4_5: '答题记录保存在浏览器本地，下次打开还在',
+    guide_tips_title: '小技巧',
+    guide_tip1: '源文档写得越详细，批改越精准',
+    guide_tip2: '得分低的题目会被优先重复出题',
+    guide_tip3: '题库和记录都存在浏览器本地，清除缓存会丢失',
+    guide_tip4: '换设备需要重新上传文档（或导出/导入题库）',
+  },
+  en: {
+    badge: 'AI Quiz Trainer · Browser-based',
+    nav_generate: '📄 Generate', nav_decks: '📚 Decks', nav_quiz: '✏️ Quiz',
+    config_btn: 'Configure API', guide_btn: '📖 Guide',
+    guide_title: '📖 ShouldPass User Guide', guide_ok: 'Got it',
+    settings_title: '⚡ Configure LLM API',
+    settings_privacy: 'Your API Key is stored locally (localStorage) and <strong>never uploaded to any server</strong>.<br>All LLM requests are sent directly from your browser.',
+    label_apikey: 'API Key', label_baseurl: 'Base URL', label_model: 'Model', label_maxtokens: 'Max Tokens',
+    settings_url_hint: 'Common: ',
+    settings_model_hint: 'e.g. deepseek-chat / gpt-4o / qwen-plus',
+    cancel: 'Cancel', save: 'Save',
+    banner_title: '👋 Welcome! Configure LLM API First',
+    banner_desc: 'ShouldPass needs an LLM to organize questions and evaluate answers. Enter your API Key — it stays in your browser, never uploaded.<br><a href="javascript:openGuide()" style="color:var(--blue);font-size:12px;">📖 Not sure how to get an API Key? Read the guide →</a>',
+    quick_fill: 'Quick fill: ',
+    banner_save: 'Save & Start →',
+    dropzone_text: 'Drag & drop a document here, or click to upload',
+    dropzone_hint: 'Supports .md / .txt / .pdf / .docx — LLM auto-structures into Q&A cards',
+    quiz_select: 'Select a deck to start',
+    quiz_placeholder: 'Type your answer... (multi-line, Cmd/Ctrl + Enter to submit)',
+    quiz_submit: '✅ Submit', quiz_skip: '⏭ Skip', quiz_finish: '📊 Finish',
+    toast_apikey_first: 'Please configure API Key first',
+    toast_deck_empty: 'Deck is empty',
+    toast_answer_empty: 'Please enter your answer',
+    toast_config_saved: 'Settings saved',
+    toast_banner_saved: 'API configured! You can now upload documents',
+    toast_deck_saved: 'Deck generated!',
+    toast_deck_deleted: 'Deleted',
+    parsing_doc: 'Parsing document...',
+    parsing_done: 'Document parsed',
+    calling_llm: 'Calling LLM to structure cards... Large docs may take 1-3 min',
+    chunk_split: 'Split into {total} chunks, processing...',
+    chunk_proc: 'Processing chunk {idx}/{total}: "{preview}"...',
+    chunk_done: 'Chunk {idx}/{total} done → {count} cards',
+    gen_empty: '⚠️ LLM returned no valid cards',
+    gen_empty_hint: 'Possible causes: document format issues, API error, or JSON parsing failure',
+    gen_empty_f12: 'Open browser console (F12) for detailed logs, or try a different document',
+    gen_success: '✅ Deck generated!',
+    gen_error_hint: 'Please check your API settings (Base URL, API Key, Model)',
+    eval_loading: 'LLM is evaluating your answer...',
+    eval_fail: 'Evaluation failed: ',
+    summary_title: '📊 Session Summary',
+    summary_score: 'Average',
+    summary_total: 'Answered',
+    summary_questions: '',
+    summary_back: 'Back to decks',
+    quiz_complete: 'Done!',
+    no_decks: 'No decks yet',
+    no_decks_hint: 'Go to 📄 Generate and upload a document',
+    no_decks_quiz: 'No decks yet. Go to 📄 Generate to upload a document.',
+    select_deck: 'Select a deck:',
+    configured: 'Configured: {model}',
+    not_configured: 'Configure API',
+    // Guide content
+    guide_step1_title: 'Step 1: Get an API Key',
+    guide_step1_p: 'ShouldPass needs an LLM to structure questions and grade answers. You need an API Key from a provider:',
+    guide_ds: 'DeepSeek (Recommended, affordable)',
+    guide_ds_url: 'Go to https://platform.deepseek.com/api_keys',
+    guide_ds_steps: 'Sign up / Log in → Click "Create API Key" → Copy & save',
+    guide_ds_info: 'Base URL: https://api.deepseek.com | Model: deepseek-chat',
+    guide_openai: 'OpenAI',
+    guide_openai_url: 'Go to https://platform.openai.com/api-keys',
+    guide_openai_steps: 'Create an API Key → Copy & save',
+    guide_openai_info: 'Base URL: https://api.openai.com/v1 | Model: gpt-4o',
+    guide_other: 'Other OpenAI-compatible providers (Ollama / Groq / etc.)',
+    guide_other_desc: 'Any service with an OpenAI-compatible /chat/completions endpoint works.',
+    guide_other_info: 'Just fill in the corresponding Base URL and Model.',
+    guide_privacy: '⚠️ Your API Key is stored only in your browser. It is never sent to any server.',
+    guide_step2_title: 'Step 2: Configure ShouldPass',
+    guide_step2_p: 'Click the "⚡ Configure API" button and fill in:',
+    guide_step2_1: 'API Key: the key from Step 1 (starts with sk-)',
+    guide_step2_2: 'Base URL: the API endpoint (DeepSeek is pre-filled)',
+    guide_step2_3: 'Model: the model name',
+    guide_step2_4: 'Click "Save"',
+    guide_step2_note: 'On first visit, the config panel appears automatically on the upload page.',
+    guide_step3_title: 'Step 3: Upload a Document',
+    guide_step3_p: 'On the "📄 Generate" tab, drag & drop or click to upload:',
+    guide_step3_1: 'Supports .md / .txt / .pdf / .docx formats',
+    guide_step3_2: 'Document should contain questions + reference answers (free format, LLM auto-parses)',
+    guide_step3_3: 'LLM extracts questions, polishes answers, and generates keywords',
+    guide_step3_4: 'Large documents (30k+ chars) are auto-split into chunks',
+    guide_step4_title: 'Step 4: Start Quizzing',
+    guide_step4_p: 'After generation, click "Start Quiz" or switch to the "✏️ Quiz" tab:',
+    guide_step4_1: 'Random questions — type your answer (multi-line supported)',
+    guide_step4_2: 'Cmd/Ctrl + Enter to submit',
+    guide_step4_3: 'LLM compares against keywords and reference answer, scores 1-5',
+    guide_step4_4: 'Shows what you got right, what you missed, and what was wrong',
+    guide_step4_5: 'Quiz history is saved in your browser for the next session',
+    guide_tips_title: 'Tips',
+    guide_tip1: 'More detailed source docs = more precise grading',
+    guide_tip2: 'Low-score questions get prioritized for re-testing',
+    guide_tip3: 'All data is stored locally — clearing browser cache will erase it',
+    guide_tip4: 'Switching devices requires re-uploading documents',
+  }
+};
+
+let currentLang = localStorage.getItem('recite_lang') || 'zh';
+
+function t(key, replacements) {
+  let text = (I18N[currentLang] || I18N.zh)[key] || I18N.zh[key] || key;
+  if (replacements) {
+    for (const [k, v] of Object.entries(replacements)) text = text.replace('{' + k + '}', v);
+  }
+  return text;
+}
+
+function switchLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('recite_lang', lang);
+  document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
+  document.getElementById('lang-btn').textContent = lang === 'en' ? '🌐 EN' : '🌐 中';
+  // Update all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (key) el.innerHTML = t(key);
+  });
+  // Update placeholders
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (key) el.placeholder = t(key);
+  });
+  // Re-render dynamic UI
+  updateConfigButton();
+  updateUploadView();
+  renderGuideContent();
+}
+
+function toggleLang() {
+  switchLang(currentLang === 'zh' ? 'en' : 'zh');
+}
+
+// ═══════════════════════════════════════════════════════════
+// Theme
+// ═══════════════════════════════════════════════════════════
+function getTheme() { return localStorage.getItem('recite_theme') || 'dark'; }
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('theme-btn').textContent = t === 'dark' ? '🌙' : '☀️';
+  localStorage.setItem('recite_theme', t);
+}
+function toggleTheme() { setTheme(getTheme() === 'dark' ? 'light' : 'dark'); }
+
 // ═══════════════════════════════════════════════════════════
 // LLM Client
 // ═══════════════════════════════════════════════════════════
@@ -382,23 +583,18 @@ function saveLLMSettingsObj(cfg) { localStorage.setItem('recite_llm', JSON.strin
 
 async function callLLM(messages, temperature=0.3, maxTokens=null) {
   const cfg = getLLMSettings();
-  if (!cfg.api_key) throw new Error('请先配置 API Key');
+  if (!cfg.api_key) throw new Error(t('toast_apikey_first'));
   const baseUrl = (cfg.base_url || 'https://api.deepseek.com').replace(/\/+$/, '');
   const res = await fetch(baseUrl + '/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.api_key },
-    body: JSON.stringify({
-      model: cfg.model || 'deepseek-chat',
-      messages, temperature,
-      max_tokens: maxTokens || parseInt(cfg.max_tokens) || 16384,
-    }),
+    body: JSON.stringify({ model: cfg.model || 'deepseek-chat', messages, temperature, max_tokens: maxTokens || parseInt(cfg.max_tokens) || 16384 }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `HTTP ${res.status}: ${res.statusText}`);
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
   }
-  const data = await res.json();
-  return data.choices[0].message.content;
+  return (await res.json()).choices[0].message.content;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -408,10 +604,7 @@ async function readDocument(file) {
   const ext = (file.name.split('.').pop() || '').toLowerCase();
   if (['md','txt','markdown','rst','org'].includes(ext)) {
     return new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result);
-      r.onerror = () => reject(new Error('Failed to read file'));
-      r.readAsText(file);
+      const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = () => reject(new Error('Failed to read')); r.readAsText(file);
     });
   }
   if (ext === 'pdf') {
@@ -426,17 +619,16 @@ async function readDocument(file) {
     return pages.join('\n\n');
   }
   if (ext === 'docx') {
-    const buf = await file.arrayBuffer();
-    const result = await mammoth.extractRawText({ arrayBuffer: buf });
+    const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
     return result.value;
   }
-  throw new Error('不支持的格式: .' + ext + '（支持 .md / .txt / .pdf / .docx）');
+  throw new Error('Unsupported: .' + ext);
 }
 
 // ═══════════════════════════════════════════════════════════
 // Card Generator
 // ═══════════════════════════════════════════════════════════
-const CARD_SYSTEM_PROMPT = `你是一个知识题库整理助手。用户会提供一份包含题目和参考答案的文档片段，请你：
+const CARD_SYSTEM_PROMPT_ZH = `你是一个知识题库整理助手。用户会提供一份包含题目和参考答案的文档片段，请你：
 
 1. 仔细阅读文档，提取出每一道题目及其参考答案。
 2. 为每道题提炼 3-6 个关键词（keywords），覆盖答案的核心要点。
@@ -459,47 +651,41 @@ const CARD_SYSTEM_PROMPT = `你是一个知识题库整理助手。用户会提�
 - 如果文档片段中没有明确题目、是纯论述，可以根据内容逻辑拆分为 2-5 道合适的题目，也可以返回空数组 []。
 - keywords 必须精准、具体，不要使用过于宽泛的词汇。`;
 
+const CARD_SYSTEM_PROMPT_EN = `You are a knowledge Q&A organizer. The user provides a document with questions and reference answers. Please:
+
+1. Read carefully and extract every question with its reference answer.
+2. For each question, extract 3-6 keywords covering the core points.
+3. Polish the reference answer to be clear and well-structured without losing any key information.
+
+Output ONLY a JSON array in this exact format, nothing else:
+
+\`\`\`json
+[
+  {
+    "question": "Question text",
+    "reference_answer": "Polished answer",
+    "keywords": ["keyword1", "keyword2", "keyword3"]
+  }
+]
+\`\`\`
+
+Notes:
+- If the document has clear question boundaries, keep the original count.
+- If it's a long essay without explicit questions, split into 2-5 appropriate questions, or return [].
+- Keywords must be precise and specific.`;
+
 const CHUNK_SIZE = 30000;
 
 function parseLLMResponse(response, label) {
-  if (!response || !response.trim()) {
-    console.warn(label + ': empty response');
-    return { cards: null, errors: ['LLM 返回了空内容'] };
-  }
+  if (!response || !response.trim()) { console.warn(label + ': empty'); return { cards: null, errors: ['Empty response'] }; }
   const errors = [];
-
-  // Strategy 1: direct JSON parse
-  try {
-    const cards = JSON.parse(response.trim());
-    if (Array.isArray(cards)) return { cards, errors };
-  } catch (e) { errors.push('直接JSON解析失败: ' + e.message); }
-
-  // Strategy 2: extract from ```json ... ``` block
+  try { const c = JSON.parse(response.trim()); if (Array.isArray(c)) return { cards: c, errors }; } catch (e) { errors.push('Direct parse: ' + e.message); }
   let m = response.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-  if (m) {
-    try { const cards = JSON.parse(m[1].trim()); if (Array.isArray(cards)) return { cards, errors }; }
-    catch (e) { errors.push('代码块提取失败: ' + e.message); }
-  }
-
-  // Strategy 3: find outermost JSON array (greedy)
+  if (m) { try { const c = JSON.parse(m[1].trim()); if (Array.isArray(c)) return { cards: c, errors }; } catch (e) { errors.push('Code block: ' + e.message); } }
   m = response.match(/\[\s*\{[\s\S]*\}\s*\]/);
-  if (m) {
-    try { const cards = JSON.parse(m[0]); if (Array.isArray(cards)) return { cards, errors }; }
-    catch (e) { errors.push('数组正则提取失败: ' + e.message); }
-  }
-
-  // Strategy 4: try to fix truncated JSON
-  m = response.match(/\[\s*\{[\s\S]*\}\s*\]/);
-  if (!m) {
-    // Maybe JSON is truncated — try to find the last complete object
-    const lastComplete = response.lastIndexOf('}]');
-    if (lastComplete > 0) {
-      const truncated = response.substring(0, lastComplete + 2);
-      try { const cards = JSON.parse(truncated); if (Array.isArray(cards)) return { cards, errors }; }
-      catch (e) { errors.push('截断修复失败: ' + e.message); }
-    }
-  }
-
+  if (m) { try { const c = JSON.parse(m[0]); if (Array.isArray(c)) return { cards: c, errors }; } catch (e) { errors.push('Array regex: ' + e.message); } }
+  const last = response.lastIndexOf('}]');
+  if (last > 0) { try { const c = JSON.parse(response.substring(0, last + 2)); if (Array.isArray(c)) return { cards: c, errors }; } catch (e) { errors.push('Truncated fix: ' + e.message); } }
   console.error(label + ': all parse strategies failed', errors);
   return { cards: null, errors };
 }
@@ -507,44 +693,30 @@ function parseLLMResponse(response, label) {
 function splitByHeaders(text) {
   const sections = text.split(/\n(?=#{1,3}\s)/);
   if (sections.length <= 1) {
-    const paragraphs = text.split('\n\n');
-    const chunks = []; let cur = '';
-    for (const p of paragraphs) {
-      if (cur.length + p.length > CHUNK_SIZE && cur) { chunks.push(cur); cur = p; }
-      else cur = (cur ? cur + '\n\n' + p : p);
-    }
-    if (cur) chunks.push(cur);
-    return chunks.length > 1 ? chunks : [text];
+    const pgs = text.split('\n\n'); const chunks = []; let cur = '';
+    for (const p of pgs) { if (cur.length + p.length > CHUNK_SIZE && cur) { chunks.push(cur); cur = p; } else cur = (cur ? cur + '\n\n' + p : p); }
+    if (cur) chunks.push(cur); return chunks.length > 1 ? chunks : [text];
   }
   const chunks = []; let cur = '';
-  for (const s of sections) {
-    if (cur.length + s.length > CHUNK_SIZE && cur) { chunks.push(cur); cur = s; }
-    else cur = (cur ? cur + '\n' + s : s);
-  }
-  if (cur) chunks.push(cur);
-  return chunks.length ? chunks : [text];
+  for (const s of sections) { if (cur.length + s.length > CHUNK_SIZE && cur) { chunks.push(cur); cur = s; } else cur = (cur ? cur + '\n' + s : s); }
+  if (cur) chunks.push(cur); return chunks.length ? chunks : [text];
 }
 
 async function generateCardsFromText(docText, onProgress) {
   let allCards = [];
+  const prompt = currentLang === 'en' ? CARD_SYSTEM_PROMPT_EN : CARD_SYSTEM_PROMPT_ZH;
   if (docText.length > CHUNK_SIZE) {
     const chunks = splitByHeaders(docText);
     if (onProgress) onProgress({ type: 'chunks', total: chunks.length });
     for (let i = 0; i < chunks.length; i++) {
       if (onProgress) onProgress({ type: 'chunk', idx: i, total: chunks.length, preview: chunks[i].trim().slice(0, 50) });
-      const resp = await callLLM([
-        { role: 'system', content: CARD_SYSTEM_PROMPT },
-        { role: 'user', content: chunks[i] },
-      ], 0.3, 16384);
-      const result = parseLLMResponse(resp, 'Chunk ' + (i+1) + '/' + chunks.length);
-      if (result.cards && result.cards.length) allCards = allCards.concat(result.cards);
+      const resp = await callLLM([{ role: 'system', content: prompt }, { role: 'user', content: chunks[i] }], 0.3, 16384);
+      const result = parseLLMResponse(resp, 'Chunk ' + (i+1));
+      if (result.cards?.length) allCards = allCards.concat(result.cards);
       if (onProgress) onProgress({ type: 'chunk_done', idx: i, count: result.cards ? result.cards.length : 0, resp: resp, errors: result.errors });
     }
   } else {
-    const resp = await callLLM([
-      { role: 'system', content: CARD_SYSTEM_PROMPT },
-      { role: 'user', content: docText },
-    ], 0.3, 16384);
+    const resp = await callLLM([{ role: 'system', content: prompt }, { role: 'user', content: docText }], 0.3, 16384);
     const result = parseLLMResponse(resp, 'Generate');
     if (result.cards) allCards = result.cards;
     if (onProgress) onProgress({ type: 'done', count: allCards.length, resp: resp, errors: result.errors });
@@ -554,26 +726,18 @@ async function generateCardsFromText(docText, onProgress) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// Deck Storage (localStorage)
+// Deck Storage
 // ═══════════════════════════════════════════════════════════
 function loadDecks() { try { return JSON.parse(localStorage.getItem('recite_decks') || '{}'); } catch { return {}; } }
-function saveDecks(decks) { localStorage.setItem('recite_decks', JSON.stringify(decks)); }
-function saveDeck(name, cards) {
-  const decks = loadDecks();
-  decks[name] = { name, cards, created_at: new Date().toISOString(), history: decks[name]?.history || [] };
-  saveDecks(decks);
-}
-function deleteDeck(name) { const decks = loadDecks(); delete decks[name]; saveDecks(decks); }
-
-function saveHistory(deckName, records) {
-  const decks = loadDecks();
-  if (decks[deckName]) { decks[deckName].history = (decks[deckName].history || []).concat(records); saveDecks(decks); }
-}
+function saveDecks(d) { localStorage.setItem('recite_decks', JSON.stringify(d)); }
+function saveDeck(name, cards) { const d = loadDecks(); d[name] = { name, cards, created_at: new Date().toISOString(), history: d[name]?.history || [] }; saveDecks(d); }
+function deleteDeck(name) { const d = loadDecks(); delete d[name]; saveDecks(d); }
+function saveHistory(name, records) { const d = loadDecks(); if (d[name]) { d[name].history = (d[name].history || []).concat(records); saveDecks(d); } }
 
 // ═══════════════════════════════════════════════════════════
 // Quiz Session
 // ═══════════════════════════════════════════════════════════
-const EVAL_SYSTEM_PROMPT = `你是一个严格的知识背诵考官。请用中文评价用户的回答。
+const EVAL_PROMPT_ZH = `你是一个严格的知识背诵考官。请用中文评价用户的回答。
 
 评价标准：
 1. 指出用户回答中**正确**的部分
@@ -597,21 +761,39 @@ const EVAL_SYSTEM_PROMPT = `你是一个严格的知识背诵考官。请用中�
 **📝 参考答案**
 （完整参考答案）`;
 
+const EVAL_PROMPT_EN = `You are a strict knowledge quiz examiner. Evaluate the user's answer in English.
+
+Criteria:
+1. Point out what the user got **correct**
+2. Point out **missed** key points
+3. Point out **wrong or inaccurate** parts
+4. Give a score of 1-5
+
+Reply in this Markdown format:
+
+### Score: X/5
+
+**✅ Correct**
+- ...
+
+**❌ Missed**
+- ...
+
+**⚠️ Wrong/Inaccurate**
+- ...
+
+**📝 Reference Answer**
+(full reference answer)`;
+
 let quizState = null;
 
 function startQuiz(deckName) {
-  const decks = loadDecks();
-  const deck = decks[deckName];
-  if (!deck || !deck.cards.length) { toast('题库为空', 'error'); return; }
-  quizState = {
-    deckName,
-    cards: deck.cards.map((c, i) => { c.id = c.id ?? i; return c; }),
-    attempted: {}, history: [],
-  };
+  const decks = loadDecks(); const deck = decks[deckName];
+  if (!deck || !deck.cards.length) { toast(t('toast_deck_empty'), 'error'); return; }
+  quizState = { deckName, cards: deck.cards.map((c,i) => { c.id = c.id ?? i; return c; }), attempted: {}, history: [] };
   document.getElementById('quiz-empty').classList.add('hidden');
   document.getElementById('quiz-active').classList.remove('hidden');
-  showTab('quiz');
-  nextQuestion();
+  showTab('quiz'); nextQuestion();
 }
 
 async function nextQuestion() {
@@ -619,20 +801,14 @@ async function nextQuestion() {
   document.getElementById('eval-container').innerHTML = '';
   document.getElementById('quiz-answer').value = '';
   document.getElementById('btn-submit').disabled = false;
-
-  const cards = quizState.cards;
-  const attempted = quizState.attempted;
+  const cards = quizState.cards; const attempted = quizState.attempted;
   if (Object.keys(attempted).length >= cards.length) { finishQuiz(); return; }
-
   const unattempted = cards.filter(c => !(c.id in attempted));
-  const pick = unattempted.length
-    ? unattempted[Math.floor(Math.random() * unattempted.length)]
-    : (cards.filter(c => (attempted[c.id]?.score || 0) < 3)
-        .sort((a, b) => (attempted[a.id]?.score || 0) - (attempted[b.id]?.score || 0))[0] || cards[0]);
-
+  const pick = unattempted.length ? unattempted[Math.floor(Math.random() * unattempted.length)]
+    : (cards.filter(c => (attempted[c.id]?.score || 0) < 3).sort((a,b) => (attempted[a.id]?.score||0) - (attempted[b.id]?.score||0))[0] || cards[0]);
   quizState.currentCard = pick;
   document.getElementById('quiz-question').textContent = pick.question;
-  document.getElementById('quiz-progress-text').textContent = `已答 ${Object.keys(attempted).length} / ${cards.length} 题`;
+  document.getElementById('quiz-progress-text').textContent = `${currentLang === 'en' ? 'Answered' : '已答'} ${Object.keys(attempted).length} / ${cards.length} ${currentLang === 'en' ? 'questions' : '题'}`;
   document.getElementById('quiz-progress-bar').style.width = (Object.keys(attempted).length / cards.length * 100) + '%';
   const kw = document.getElementById('quiz-keywords');
   kw.innerHTML = (pick.keywords || []).map(k => `<span class="kw">${esc(k)}</span>`).join('');
@@ -643,41 +819,28 @@ async function nextQuestion() {
 async function submitAnswer() {
   if (!quizState || !quizState.currentCard) return;
   const answer = document.getElementById('quiz-answer').value.trim();
-  if (!answer) { toast('请输入你的答案再提交', 'error'); return; }
-
+  if (!answer) { toast(t('toast_answer_empty'), 'error'); return; }
   document.getElementById('btn-submit').disabled = true;
   const evalDiv = document.getElementById('eval-container');
-  evalDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>LLM 正在评价你的回答...</p></div>';
-
+  evalDiv.innerHTML = `<div class="loading"><div class="spinner"></div><p>${t('eval_loading')}</p></div>`;
   const card = quizState.currentCard;
   try {
     const resp = await callLLM([
-      { role: 'system', content: EVAL_SYSTEM_PROMPT },
-      { role: 'user', content: `题目：${card.question}\n\n参考答案：${card.reference_answer}\n\n关键词：${card.keywords.join(', ')}\n\n用户的回答：\n${answer}\n\n请评价。` },
+      { role: 'system', content: currentLang === 'en' ? EVAL_PROMPT_EN : EVAL_PROMPT_ZH },
+      { role: 'user', content: `${currentLang === 'en' ? 'Question' : '题目'}：${card.question}\n\n${currentLang === 'en' ? 'Reference Answer' : '参考答案'}：${card.reference_answer}\n\n${currentLang === 'en' ? 'Keywords' : '关键词'}：${card.keywords.join(', ')}\n\n${currentLang === 'en' ? 'User Answer' : '用户的回答'}：\n${answer}\n\n${currentLang === 'en' ? 'Please evaluate.' : '请评价。'}` },
     ], 0.3);
-
-    const m = resp.match(/评分[：:]\s*(\d)\/5/);
-    const score = m ? parseInt(m[1]) : -1;
-
+    const scoreRegex = currentLang === 'en' ? /Score:\s*(\d)\/5/i : /评分[：:]\s*(\d)\/5/;
+    const m = resp.match(scoreRegex); const score = m ? parseInt(m[1]) : -1;
     quizState.attempted[card.id] = { score, answer, ts: new Date().toISOString() };
     quizState.history.push({ question: card.question, score, answer, evaluation: resp });
-
     const sc = score >= 4 ? 'score-high' : score >= 2 ? 'score-mid' : 'score-low';
     const stars = '★'.repeat(Math.max(0,score)) + '☆'.repeat(Math.max(0,5-score));
-
-    evalDiv.innerHTML = `<div class="eval-card">
-      <div class="score-badge ${sc}">${stars} ${score}/5</div>
-      <div style="margin-top:14px;">${formatMD(resp)}</div>
-    </div>
-    <div class="btn-row" style="margin-top:14px;">
-      <button class="primary" onclick="nextQuestion()">下一题 →</button>
-      <button class="secondary" onclick="finishQuiz()">结束答题</button>
-    </div>`;
-
-    document.getElementById('quiz-progress-text').textContent = `已答 ${Object.keys(quizState.attempted).length} / ${quizState.cards.length} 题`;
+    evalDiv.innerHTML = `<div class="eval-card"><div class="score-badge ${sc}">${stars} ${score}/5</div><div style="margin-top:14px;">${formatMD(resp)}</div></div>
+      <div class="btn-row" style="margin-top:14px;"><button class="primary" onclick="nextQuestion()">${currentLang === 'en' ? 'Next →' : '下一题 →'}</button><button class="secondary" onclick="finishQuiz()">${currentLang === 'en' ? 'Finish' : '结束答题'}</button></div>`;
+    document.getElementById('quiz-progress-text').textContent = `${currentLang === 'en' ? 'Answered' : '已答'} ${Object.keys(quizState.attempted).length} / ${quizState.cards.length} ${currentLang === 'en' ? 'questions' : '题'}`;
     document.getElementById('quiz-progress-bar').style.width = (Object.keys(quizState.attempted).length / quizState.cards.length * 100) + '%';
   } catch (e) {
-    evalDiv.innerHTML = `<div class="eval-card"><span style="color:var(--red)">评价失败: ${esc(e.message)}</span></div>`;
+    evalDiv.innerHTML = `<div class="eval-card"><span style="color:var(--red)">${t('eval_fail')}${esc(e.message)}</span></div>`;
     document.getElementById('btn-submit').disabled = false;
   }
 }
@@ -685,27 +848,18 @@ async function submitAnswer() {
 async function finishQuiz() {
   if (!quizState) return;
   document.getElementById('btn-submit').disabled = true;
-
-  const history = quizState.history;
-  const scores = history.map(h => h.score).filter(s => s >= 0);
+  const history = quizState.history; const scores = history.map(h => h.score).filter(s => s >= 0);
   const avg = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : 0;
   saveHistory(quizState.deckName, history);
-
   document.getElementById('eval-container').innerHTML = `<div class="eval-card">
-    <h3>📊 答题总结</h3>
-    <p style="font-size:18px;margin:10px 0;">平均分: <strong>${avg}/5</strong> | 共答 ${history.length}/${quizState.cards.length} 题</p>
-    <div class="summary">
-      ${history.map(h => { const s = h.score || 0;
-        return `<div class="row"><span>${esc(h.question)}</span><span class="stars">${'★'.repeat(Math.max(0,s))}${'☆'.repeat(Math.max(0,5-s))}</span></div>`;
-      }).join('')}
-    </div>
-    <div class="btn-row" style="margin-top:14px;">
-      <button class="secondary" onclick="showTab('decks');renderDecks()">返回题库列表</button>
-    </div>
-  </div>`;
-
+    <h3>${t('summary_title')}</h3>
+    <p style="font-size:18px;margin:10px 0;">${t('summary_score')}: <strong>${avg}/5</strong> | ${t('summary_total')} ${history.length}/${quizState.cards.length} ${t('summary_questions')}</p>
+    <div class="summary">${history.map(h => { const s = h.score || 0;
+      return `<div class="row"><span>${esc(h.question)}</span><span class="stars">${'★'.repeat(Math.max(0,s))}${'☆'.repeat(Math.max(0,5-s))}</span></div>`;
+    }).join('')}</div>
+    <div class="btn-row" style="margin-top:14px;"><button class="secondary" onclick="showTab('decks');renderDecks()">${t('summary_back')}</button></div></div>`;
   document.getElementById('quiz-progress-bar').style.width = '100%';
-  document.getElementById('quiz-progress-text').textContent = `完成！${history.length} 题`;
+  document.getElementById('quiz-progress-text').textContent = `${t('quiz_complete')} ${history.length} ${currentLang === 'en' ? 'Q' : '题'}`;
   quizState = null;
 }
 
@@ -716,76 +870,38 @@ async function finishQuiz() {
   const dz = document.getElementById('dropzone');
   dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-  dz.addEventListener('drop', e => {
-    e.preventDefault(); dz.classList.remove('dragover');
-    if (e.dataTransfer.files.length) handleUpload(e.dataTransfer.files[0]);
-  });
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); if (e.dataTransfer.files.length) handleUpload(e.dataTransfer.files[0]); });
 })();
 
 async function handleUpload(file) {
   if (!file) return;
-  const cfg = getLLMSettings();
-  if (!cfg.api_key) { toast('请先配置 API Key', 'error'); showSetupBanner(true); return; }
-
-  const status = document.getElementById('upload-status');
-  status.classList.remove('hidden');
-  status.innerHTML = '<div class="loading"><div class="spinner"></div><p>正在解析文档...</p></div>';
-
+  if (!getLLMSettings().api_key) { toast(t('toast_apikey_first'), 'error'); showSetupBanner(true); return; }
+  const status = document.getElementById('upload-status'); status.classList.remove('hidden');
+  status.innerHTML = `<div class="loading"><div class="spinner"></div><p>${t('parsing_doc')}</p></div>`;
   try {
     const docText = await readDocument(file);
-    status.innerHTML = `<div class="loading"><div class="spinner"></div><p>文档已解析（${docText.length.toLocaleString()} 字符）</p><p style="font-size:12px;color:var(--dim);">正在调用 LLM 梳理题目... 大文件可能需要 1-3 分钟</p><div id="chunk-progress" style="margin-top:6px;font-size:12px;color:var(--dim);"></div></div>`;
-
+    status.innerHTML = `<div class="loading"><div class="spinner"></div><p>${t('parsing_done')}（${docText.length.toLocaleString()} ${currentLang === 'en' ? 'chars' : '字符'}）</p><p style="font-size:12px;color:var(--dim);">${t('calling_llm')}</p><div id="chunk-progress" style="margin-top:6px;font-size:12px;color:var(--dim);"></div></div>`;
     const chunkLogs = [];
     const cards = await generateCardsFromText(docText, (ev) => {
-      const cp = document.getElementById('chunk-progress');
-      if (!cp) return;
-      if (ev.type === 'chunks') cp.textContent = `文档已分为 ${ev.total} 个片段，逐段调用 LLM 处理...`;
-      else if (ev.type === 'chunk') cp.textContent = `处理片段 ${ev.idx+1}/${ev.total}：「${ev.preview}」...`;
-      else if (ev.type === 'chunk_done') {
-        cp.textContent = `片段 ${ev.idx+1}/${ev.total} 完成 → 提取 ${ev.count} 题`;
-        if (ev.errors && ev.errors.length) chunkLogs.push({ idx: ev.idx, errors: ev.errors, resp: ev.resp });
-      } else if (ev.type === 'done') {
-        if (ev.errors && ev.errors.length) chunkLogs.push({ idx: -1, errors: ev.errors, resp: ev.resp });
-      }
+      const cp = document.getElementById('chunk-progress'); if (!cp) return;
+      if (ev.type === 'chunks') cp.textContent = t('chunk_split', { total: ev.total });
+      else if (ev.type === 'chunk') cp.textContent = t('chunk_proc', { idx: ev.idx+1, total: ev.total, preview: ev.preview });
+      else if (ev.type === 'chunk_done') { cp.textContent = t('chunk_done', { idx: ev.idx+1, total: ev.total, count: ev.count }); if (ev.errors?.length) chunkLogs.push({ idx: ev.idx, errors: ev.errors, resp: ev.resp }); }
+      else if (ev.type === 'done' && ev.errors?.length) chunkLogs.push({ idx: -1, errors: ev.errors, resp: ev.resp });
     });
-
     if (!cards.length) {
       let debugHtml = '';
-      if (chunkLogs.length) {
-        debugHtml = '<div class="debug-box">';
-        for (const log of chunkLogs) {
-          debugHtml += `<strong>片段 ${log.idx+1} 解析错误：</strong>\n${esc(log.errors.join('\n'))}\n\n`;
-          debugHtml += `<strong>LLM 原始返回（前 500 字）：</strong>\n${esc((log.resp||'').slice(0,500))}\n\n`;
-        }
-        debugHtml += '</div>';
-      }
-      status.innerHTML = `<div class="eval-card">
-        <p style="color:var(--red);font-weight:600;">⚠️ LLM 未返回有效题目</p>
-        <p style="color:var(--dim);font-size:12px;margin-top:8px;">可能原因：文档格式问题、API 返回异常、或 JSON 解析失败</p>
-        <p style="color:var(--dim);font-size:12px;">请打开浏览器控制台（F12）查看详细日志，或尝试换一个文档</p>
-        ${debugHtml}
-      </div>`;
+      if (chunkLogs.length) { debugHtml = '<div class="debug-box">'; for (const log of chunkLogs) { debugHtml += `<strong>Chunk ${log.idx+1} errors:</strong>\n${esc(log.errors.join('\n'))}\n\n<strong>LLM raw (first 500 chars):</strong>\n${esc((log.resp||'').slice(0,500))}\n\n`; } debugHtml += '</div>'; }
+      status.innerHTML = `<div class="eval-card"><p style="color:var(--red);font-weight:600;">${t('gen_empty')}</p><p style="color:var(--dim);font-size:12px;margin-top:8px;">${t('gen_empty_hint')}</p><p style="color:var(--dim);font-size:12px;">${t('gen_empty_f12')}</p>${debugHtml}</div>`;
       return;
     }
-
-    const baseName = file.name.replace(/\.[^.]+$/, '');
-    saveDeck(baseName, cards);
-
-    status.innerHTML = `<div class="eval-card">
-      <p style="color:var(--green);font-weight:600;">✅ 题库生成成功！</p>
-      <p style="margin-top:8px;"><strong>${esc(baseName)}</strong> — ${cards.length} 道题目</p>
-      <div style="margin-top:8px;max-height:280px;overflow-y:auto;">
-        ${cards.map((c,i) => `<div style="padding:3px 0;border-bottom:1px solid var(--border);font-size:12px;">${i+1}. ${esc(c.question)}</div>`).join('')}
-      </div>
-      <button class="primary" style="margin-top:12px;" onclick="startQuiz('${esc(baseName).replace(/'/g, "\\'")}')">开始答题 →</button>
-    </div>`;
-    toast('题库生成成功！' + cards.length + ' 道题目', 'success');
+    const baseName = file.name.replace(/\.[^.]+$/, ''); saveDeck(baseName, cards);
+    status.innerHTML = `<div class="eval-card"><p style="color:var(--green);font-weight:600;">${t('gen_success')}</p><p style="margin-top:8px;"><strong>${esc(baseName)}</strong> — ${cards.length} ${currentLang === 'en' ? 'cards' : '道题目'}</p>
+      <div style="margin-top:8px;max-height:280px;overflow-y:auto;">${cards.map((c,i) => `<div style="padding:3px 0;border-bottom:1px solid var(--border);font-size:12px;">${i+1}. ${esc(c.question)}</div>`).join('')}</div>
+      <button class="primary" style="margin-top:12px;" onclick="startQuiz('${esc(baseName).replace(/'/g, "\\'")}')">${currentLang === 'en' ? 'Start Quiz →' : '开始答题 →'}</button></div>`;
+    toast(t('toast_deck_saved') + cards.length + (currentLang === 'en' ? ' cards' : ' 道题目'), 'success');
   } catch (e) {
-    status.innerHTML = `<div class="eval-card">
-      <p style="color:var(--red);font-weight:600;">错误</p>
-      <p style="margin-top:6px;">${esc(e.message)}</p>
-      <p style="color:var(--dim);font-size:12px;margin-top:4px;">请检查 API 配置是否正确（Base URL、API Key、Model）</p>
-    </div>`;
+    status.innerHTML = `<div class="eval-card"><p style="color:var(--red);font-weight:600;">${currentLang === 'en' ? 'Error' : '错误'}</p><p style="margin-top:6px;">${esc(e.message)}</p><p style="color:var(--dim);font-size:12px;margin-top:4px;">${t('gen_error_hint')}</p></div>`;
   }
 }
 
@@ -793,23 +909,13 @@ async function handleUpload(file) {
 // UI: Decks
 // ═══════════════════════════════════════════════════════════
 function renderDecks() {
-  const decks = loadDecks();
-  const container = document.getElementById('deck-list-container');
-  const names = Object.keys(decks);
-  if (!names.length) {
-    container.innerHTML = '<div class="empty"><div class="icon">📭</div><p>暂无题库</p><p style="font-size:13px;margin-top:4px;">去「📄 生成题库」上传文档开始吧</p></div>';
-    return;
-  }
+  const decks = loadDecks(); const names = Object.keys(decks); const container = document.getElementById('deck-list-container');
+  if (!names.length) { container.innerHTML = `<div class="empty"><div class="icon">📭</div><p>${t('no_decks')}</p><p style="font-size:13px;margin-top:4px;">${t('no_decks_hint')}</p></div>`; return; }
   container.innerHTML = `<div class="deck-list">${names.map(name => {
     const d = decks[name]; const hc = (d.history || []).length;
-    return `<div class="deck-card">
-      <div style="flex:1;cursor:pointer" onclick="startQuiz('${esc(name)}')">
-        <div class="name">📚 ${esc(name)}</div>
-        <div class="meta">${d.cards.length} 题 · ${hc} 次作答 · ${(d.created_at||'').slice(0,10)}</div>
-      </div>
-      <span style="color:var(--blue);font-size:13px;margin-right:6px;">${d.cards.length} 题</span>
-      <button class="del-btn" onclick="event.stopPropagation();if(confirm('删除题库「${esc(name)}」？')){deleteDeck('${esc(name)}');renderDecks();toast('已删除','success')}">🗑</button>
-    </div>`;
+    return `<div class="deck-card"><div style="flex:1;cursor:pointer" onclick="startQuiz('${esc(name)}')"><div class="name">📚 ${esc(name)}</div><div class="meta">${d.cards.length} ${currentLang==='en'?'cards':'题'} · ${hc} ${currentLang==='en'?'attempts':'次作答'} · ${(d.created_at||'').slice(0,10)}</div></div>
+      <span style="color:var(--blue);font-size:13px;margin-right:6px;">${d.cards.length} ${currentLang==='en'?'Q':'题'}</span>
+      <button class="del-btn" onclick="event.stopPropagation();if(confirm('${currentLang==='en'?'Delete deck \\'':'删除题库「'}${esc(name)}${currentLang==='en'?'\\'?':'」？'}')){deleteDeck('${esc(name)}');renderDecks();toast(t('toast_deck_deleted'),'success')}">🗑</button></div>`;
   }).join('')}</div>`;
 }
 
@@ -817,19 +923,17 @@ function renderDecks() {
 // UI: Tabs & Settings
 // ═══════════════════════════════════════════════════════════
 function showTab(name) {
-  ['upload','decks','quiz'].forEach(t => {
-    document.getElementById('tab-' + t).classList.toggle('hidden', t !== name);
-    document.getElementById('nav-' + t).classList.toggle('active', t === name);
-  });
-  if (name === 'decks') renderDecks();
-  if (name === 'quiz') renderQuizSelector();
+  ['upload','decks','quiz'].forEach(t => { document.getElementById('tab-'+t).classList.toggle('hidden', t!==name); document.getElementById('nav-'+t).classList.toggle('active', t===name); });
+  if (name==='decks') renderDecks();
+  if (name==='quiz') {
+    const decks = loadDecks(); const names = Object.keys(decks); const sel = document.getElementById('quiz-deck-selector');
+    if (!names.length) { sel.innerHTML = `<p style="color:var(--dim)">${t('no_decks_quiz')}</p>`; }
+    else { sel.innerHTML = `<p style="color:var(--dim);margin-bottom:10px;">${t('select_deck')}</p><div class="deck-list">${names.map(n => `<div class="deck-card" onclick="startQuiz('${esc(n)}')"><div><div class="name">${esc(n)}</div></div><div class="count">${decks[n].cards.length} ${currentLang==='en'?'Q':'题'}</div></div>`).join('')}</div>`; }
+  }
   if (name === 'upload') updateUploadView();
 }
 
-function updateUploadView() {
-  const cfg = getLLMSettings();
-  showSetupBanner(!cfg.api_key);
-}
+function updateUploadView() { showSetupBanner(!getLLMSettings().api_key); }
 
 function showSetupBanner(show) {
   document.getElementById('setup-banner').classList.toggle('hidden', !show);
@@ -843,46 +947,39 @@ function showSetupBanner(show) {
   }
 }
 
-function fillPreset(provider) {
-  if (provider === 'deepseek') {
-    document.getElementById('banner-base-url').value = 'https://api.deepseek.com';
-    document.getElementById('banner-model').value = 'deepseek-chat';
-  } else if (provider === 'openai') {
-    document.getElementById('banner-base-url').value = 'https://api.openai.com/v1';
-    document.getElementById('banner-model').value = 'gpt-4o';
-  }
+function fillPreset(p) {
+  if (p === 'deepseek') { document.getElementById('banner-base-url').value = 'https://api.deepseek.com'; document.getElementById('banner-model').value = 'deepseek-chat'; }
+  else if (p === 'openai') { document.getElementById('banner-base-url').value = 'https://api.openai.com/v1'; document.getElementById('banner-model').value = 'gpt-4o'; }
 }
 
 function saveBannerSettings() {
-  saveLLMSettingsObj({
-    api_key: document.getElementById('banner-api-key').value.trim(),
-    base_url: document.getElementById('banner-base-url').value.trim().replace(/\/+$/, ''),
-    model: document.getElementById('banner-model').value.trim(),
-    max_tokens: document.getElementById('banner-max-tokens').value || '16384',
-  });
-  updateUploadView();
-  updateConfigButton();
-  toast('API 配置已保存！现在可以上传文档了', 'success');
+  saveLLMSettingsObj({ api_key: document.getElementById('banner-api-key').value.trim(), base_url: document.getElementById('banner-base-url').value.trim().replace(/\/+$/, ''), model: document.getElementById('banner-model').value.trim(), max_tokens: document.getElementById('banner-max-tokens').value || '16384' });
+  updateUploadView(); updateConfigButton(); toast(t('toast_banner_saved'), 'success');
 }
 
-function renderQuizSelector() {
-  const decks = loadDecks();
-  const names = Object.keys(decks);
-  const sel = document.getElementById('quiz-deck-selector');
-  if (!names.length) {
-    sel.innerHTML = '<p style="color:var(--dim)">暂无题库，先去「📄 生成题库」上传文档</p>';
-  } else {
-    sel.innerHTML = `<p style="color:var(--dim);margin-bottom:10px;">选择题库开始答题：</p>
-      <div class="deck-list">${names.map(n =>
-        `<div class="deck-card" onclick="startQuiz('${esc(n)}')">
-          <div><div class="name">${esc(n)}</div></div>
-          <div class="count">${decks[n].cards.length} 题</div>
-        </div>`).join('')}</div>`;
-  }
-}
-
-function openGuide() { document.getElementById('guide-modal').classList.remove('hidden'); }
+function openGuide() { document.getElementById('guide-modal').classList.remove('hidden'); renderGuideContent(); }
 function closeGuide() { document.getElementById('guide-modal').classList.add('hidden'); }
+
+function renderGuideContent() {
+  const g = document.getElementById('guide-content');
+  g.innerHTML = `
+    <h3>${t('guide_step1_title')}</h3><p>${t('guide_step1_p')}</p>
+    <ul>
+      <li><strong>${t('guide_ds')}</strong>：<br>${t('guide_ds_url')}<br>${t('guide_ds_steps')}<br><span style="color:var(--dim);font-size:11px;">${t('guide_ds_info')}</span></li>
+      <li style="margin-top:8px;"><strong>${t('guide_openai')}</strong>：<br>${t('guide_openai_url')}<br>${t('guide_openai_steps')}<br><span style="color:var(--dim);font-size:11px;">${t('guide_openai_info')}</span></li>
+      <li style="margin-top:8px;"><strong>${t('guide_other')}</strong>：<br>${t('guide_other_desc')}<br><span style="color:var(--dim);font-size:11px;">${t('guide_other_info')}</span></li>
+    </ul>
+    <p class="tip" style="margin-top:8px;">${t('guide_privacy')}</p>
+    <h3>${t('guide_step2_title')}</h3><p>${t('guide_step2_p')}</p>
+    <ul><li>${t('guide_step2_1')}</li><li>${t('guide_step2_2')}</li><li>${t('guide_step2_3')}</li><li>${t('guide_step2_4')}</li></ul>
+    <p style="color:var(--dim);font-size:11px;margin-top:4px;">${t('guide_step2_note')}</p>
+    <h3>${t('guide_step3_title')}</h3><p>${t('guide_step3_p')}</p>
+    <ul><li>${t('guide_step3_1')}</li><li>${t('guide_step3_2')}</li><li>${t('guide_step3_3')}</li><li>${t('guide_step3_4')}</li></ul>
+    <h3>${t('guide_step4_title')}</h3><p>${t('guide_step4_p')}</p>
+    <ul><li>${t('guide_step4_1')}</li><li>${t('guide_step4_2')}</li><li>${t('guide_step4_3')}</li><li>${t('guide_step4_4')}</li><li>${t('guide_step4_5')}</li></ul>
+    <h3>${t('guide_tips_title')}</h3>
+    <ul><li>${t('guide_tip1')}</li><li>${t('guide_tip2')}</li><li>${t('guide_tip3')}</li><li>${t('guide_tip4')}</li></ul>`;
+}
 
 function openSettings() {
   const cfg = getLLMSettings();
@@ -894,28 +991,14 @@ function openSettings() {
 }
 function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
 function saveSettings() {
-  saveLLMSettingsObj({
-    api_key: document.getElementById('cfg-api-key').value.trim(),
-    base_url: document.getElementById('cfg-base-url').value.trim().replace(/\/+$/, ''),
-    model: document.getElementById('cfg-model').value.trim(),
-    max_tokens: document.getElementById('cfg-max-tokens').value || '16384',
-  });
-  closeSettings();
-  updateUploadView();
-  updateConfigButton();
-  toast('配置已保存', 'success');
+  saveLLMSettingsObj({ api_key: document.getElementById('cfg-api-key').value.trim(), base_url: document.getElementById('cfg-base-url').value.trim().replace(/\/+$/, ''), model: document.getElementById('cfg-model').value.trim(), max_tokens: document.getElementById('cfg-max-tokens').value || '16384' });
+  closeSettings(); updateUploadView(); updateConfigButton(); toast(t('toast_config_saved'), 'success');
 }
 
 function updateConfigButton() {
-  const cfg = getLLMSettings();
-  const btn = document.getElementById('config-btn');
-  if (cfg.api_key) {
-    btn.classList.add('configured');
-    btn.textContent = '⚡ 已配置: ' + (cfg.model || 'LLM');
-  } else {
-    btn.classList.remove('configured');
-    btn.textContent = '⚡ 配置API';
-  }
+  const cfg = getLLMSettings(); const btn = document.getElementById('config-btn');
+  if (cfg.api_key) { btn.classList.add('configured'); btn.innerHTML = '⚡ ' + t('configured', { model: cfg.model || 'LLM' }); }
+  else { btn.classList.remove('configured'); btn.innerHTML = '⚡ ' + t('not_configured'); }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -925,48 +1008,28 @@ function esc(s) { const d = document.createElement('div'); d.textContent = Strin
 
 function formatMD(text) {
   if (!text) return '';
-  return esc(text)
-    .replace(/### (.+)/g, '<h3>$1</h3>')
-    .replace(/## (.+)/g, '<h3>$1</h3>')
-    .replace(/^- (.+)/gm, '<li>$1</li>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
-    .replace(/<\/li>\n<li>/g, '</li><li>')
-    .replace(/\n\n/g, '<br><br>')
-    .replace(/\n/g, '<br>');
+  return esc(text).replace(/### (.+)/g, '<h3>$1</h3>').replace(/## (.+)/g, '<h3>$1</h3>').replace(/^- (.+)/gm, '<li>$1</li>').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>').replace(/<\/li>\n<li>/g, '</li><li>').replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
 }
 
 function toast(msg, type) {
-  const el = document.createElement('div');
-  el.className = 'toast ' + (type || '');
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 3000);
+  const el = document.createElement('div'); el.className = 'toast ' + (type || ''); el.textContent = msg;
+  document.body.appendChild(el); setTimeout(() => el.remove(), 3000);
 }
 
 // ═══════════════════════════════════════════════════════════
 // Init
 // ═══════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+  setTheme(getTheme());
+  switchLang(currentLang);
   updateConfigButton();
   updateUploadView();
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 });
-
-document.getElementById('settings-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeSettings();
-});
-document.getElementById('guide-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeGuide();
-});
-
+document.getElementById('settings-modal').addEventListener('click', function(e) { if (e.target === this) closeSettings(); });
+document.getElementById('guide-modal').addEventListener('click', function(e) { if (e.target === this) closeGuide(); });
 document.addEventListener('keydown', e => {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-    if (!document.getElementById('tab-quiz').classList.contains('hidden')
-        && !document.getElementById('quiz-active').classList.contains('hidden')) {
-      submitAnswer();
-    }
-  }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && !document.getElementById('tab-quiz').classList.contains('hidden') && !document.getElementById('quiz-active').classList.contains('hidden')) submitAnswer();
 });
 </script>
 </body>
