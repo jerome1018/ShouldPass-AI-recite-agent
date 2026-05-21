@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>recite — AI 背诵教官</title>
+<title>ShouldPass — AI 背诵教官</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 <style>
@@ -182,7 +182,7 @@
 
 <header>
   <div class="brand">
-    <h1>🧠 recite</h1>
+    <h1>🧠 ShouldPass</h1>
     <span class="badge">AI 背诵教官 · 纯浏览器运行</span>
   </div>
   <div class="right">
@@ -192,8 +192,78 @@
       <button id="nav-quiz" onclick="showTab('quiz')">✏️ 答题</button>
     </nav>
     <button class="config-btn" id="config-btn" onclick="openSettings()">⚡ 配置API</button>
+    <button class="secondary" onclick="openGuide()" style="font-size:13px;padding:7px 14px;">📖 使用指南</button>
   </div>
 </header>
+
+<!-- Guide modal -->
+<div class="modal-overlay hidden" id="guide-modal">
+  <div class="modal" style="width:600px;max-height:80vh;overflow-y:auto;">
+    <h2>📖 ShouldPass 使用指南</h2>
+    <div style="font-size:13px;line-height:1.9;color:var(--text);">
+
+      <h3 style="color:var(--yellow);margin:16px 0 8px;">第一步：获取 API Key</h3>
+      <p>ShouldPass 需要调用大模型来梳理题目和批改答案。你需要一个 LLM 的 API Key：</p>
+      <ul style="padding-left:18px;margin:8px 0;">
+        <li><strong>DeepSeek（推荐，便宜）</strong>：<br>
+          打开 <a href="https://platform.deepseek.com/api_keys" target="_blank" style="color:var(--blue);">https://platform.deepseek.com/api_keys</a><br>
+          注册/登录 → 点击「创建 API Key」→ 复制保存<br>
+          <span style="color:var(--dim);font-size:11px;">Base URL: https://api.deepseek.com | Model: deepseek-chat</span>
+        </li>
+        <li style="margin-top:8px;"><strong>OpenAI</strong>：<br>
+          打开 <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--blue);">https://platform.openai.com/api-keys</a><br>
+          创建 API Key → 复制保存<br>
+          <span style="color:var(--dim);font-size:11px;">Base URL: https://api.openai.com/v1 | Model: gpt-4o</span>
+        </li>
+        <li style="margin-top:8px;"><strong>其他兼容接口</strong>（Ollama / Groq / 硅基流动 等）：<br>
+          只要支持 OpenAI 兼容的 /chat/completions 端点即可<br>
+          <span style="color:var(--dim);font-size:11px;">填入对应的 Base URL + Model 就行</span>
+        </li>
+      </ul>
+      <p style="color:var(--orange);font-size:12px;">⚠️ API Key 只保存在你的浏览器本地，不会上传到任何服务器。</p>
+
+      <h3 style="color:var(--yellow);margin:18px 0 8px;">第二步：配置 ShouldPass</h3>
+      <p>点击右上角 <strong>「⚡ 配置API」</strong> 按钮，填入：</p>
+      <ul style="padding-left:18px;margin:8px 0;">
+        <li><strong>API Key</strong>：上一步获取的 key（sk- 开头）</li>
+        <li><strong>Base URL</strong>：API 地址（默认已填好 DeepSeek）</li>
+        <li><strong>Model</strong>：模型名称</li>
+        <li>点击「保存配置」</li>
+      </ul>
+      <p style="color:var(--dim);font-size:11px;">首次访问时，上传区会自动显示配置面板，直接在那里填也可以。</p>
+
+      <h3 style="color:var(--yellow);margin:18px 0 8px;">第三步：上传文档生成题库</h3>
+      <p>在「📄 生成题库」页面，拖拽或点击上传你的学习文档：</p>
+      <ul style="padding-left:18px;margin:8px 0;">
+        <li>支持 <strong>.md / .txt / .pdf / .docx</strong> 格式</li>
+        <li>文档里应有题目 + 参考答案（格式不限，LLM 会自动梳理）</li>
+        <li>上传后 LLM 自动提取题目、润色答案、生成关键词</li>
+        <li>大文档（3万+ 字）会自动分片处理，耐心等待即可</li>
+      </ul>
+
+      <h3 style="color:var(--yellow);margin:18px 0 8px;">第四步：开始答题</h3>
+      <p>题库生成后，点击「开始答题」或切换到「✏️ 答题」标签：</p>
+      <ul style="padding-left:18px;margin:8px 0;">
+        <li>随机出题，你在文本框里作答（支持多行）</li>
+        <li><strong>Cmd/Ctrl + Enter</strong> 提交答案</li>
+        <li>LLM 逐关键词对照参考答案，给出 1-5 分评价</li>
+        <li>指出你答对的部分、遗漏的关键点、错误的地方</li>
+        <li>答题记录保存在浏览器本地，下次打开还在</li>
+      </ul>
+
+      <h3 style="color:var(--yellow);margin:18px 0 8px;">小技巧</h3>
+      <ul style="padding-left:18px;margin:8px 0;">
+        <li>源文档写得越详细，批改越精准</li>
+        <li>得分低的题目会被优先重复出题</li>
+        <li>题库和记录都存在浏览器本地，清除缓存会丢失</li>
+        <li>换设备需要重新上传文档（或导出/导入题库）</li>
+      </ul>
+    </div>
+    <div class="btn-row" style="justify-content:flex-end;margin-top:18px;">
+      <button class="primary" onclick="closeGuide()">我知道了</button>
+    </div>
+  </div>
+</div>
 
 <!-- Settings modal -->
 <div class="modal-overlay hidden" id="settings-modal">
@@ -230,7 +300,7 @@
     <!-- Onboarding: shown when no API key configured -->
     <div class="setup-banner hidden" id="setup-banner">
       <h2>👋 欢迎！请先配置 LLM API</h2>
-      <p>recite 需要调用大模型来梳理题目和评价答案。请输入你的 API Key——不会上传，只存在你浏览器里。</p>
+      <p>ShouldPass 需要调用大模型来梳理题目和评价答案。请输入你的 API Key——不会上传，只存在你浏览器里。<br><a href="javascript:openGuide()" style="color:var(--blue);font-size:12px;">📖 不知道怎么获取 API Key？查看使用指南 →</a></p>
       <div class="fields">
         <div>
           <label>API Key</label>
@@ -811,6 +881,9 @@ function renderQuizSelector() {
   }
 }
 
+function openGuide() { document.getElementById('guide-modal').classList.remove('hidden'); }
+function closeGuide() { document.getElementById('guide-modal').classList.add('hidden'); }
+
 function openSettings() {
   const cfg = getLLMSettings();
   document.getElementById('cfg-api-key').value = cfg.api_key || '';
@@ -882,6 +955,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.getElementById('settings-modal').addEventListener('click', function(e) {
   if (e.target === this) closeSettings();
+});
+document.getElementById('guide-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeGuide();
 });
 
 document.addEventListener('keydown', e => {
